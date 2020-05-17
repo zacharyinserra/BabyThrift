@@ -1,0 +1,31 @@
+.header {
+  text-align: center;
+  background-color: #9EC4C5;
+}
+
+.slide {
+  margin: 64px;
+}
+
+.carousel-item {
+  height: 400px;
+  width: 600px;
+}
+
+.cards {
+  width: 100%;
+  text-align: center;
+  display: flex;
+}
+
+.card {
+  width: 100px;
+  margin: 64px;
+  display: inline-block;
+}
+
+.card img {
+  height: 200px;
+  background: transparent no-repeat center;
+  background-size: cover;
+}
