@@ -1,4 +1,5 @@
 //nodemon app.js --signal SIGKILL -e js,html,ejs
+//nodemon app.js -e js,html,ejs,css
 
 //jshint esversion:6
 
