@@ -1,4 +1,5 @@
 .header {
+<<<<<<< HEAD
   display: flex;
   padding: 32px;
 }
@@ -24,13 +25,28 @@
   padding: 1px;
   background-color: grey;
   margin: auto;
+=======
+  text-align: center;
+  background-color: #9EC4C5;
+  padding: 16px;
+  display: inline-flex;
+  width: 100%;
 }
 
-.carousel-item {
-  height: 400px;
-  width: 600px;
+.welcome {
+  width: 210px;
+  float: left;
+  text-align: left;
+>>>>>>> da09c8ec98cf59de9a117e9ad396a86cf54e6ec6
 }
 
+.input-group {
+  width: 80%;
+  padding-left: 16px;
+  padding-right: 16px;
+}
+
+<<<<<<< HEAD
 .cards {
   width: 80%;
   display: flex;
@@ -41,6 +57,132 @@
   width: 24%;
   margin: 0 1%;
   height: 375px;
+=======
+.register {
+  width: 300px;
+  float: right;
+  text-align: right;
+}
+
+.cart {
+  width: 49%;
+  height: 50%;
+}
+
+/* Login form hidden by default */
+.login-popup {
+  display: none;
+  /* Hidden by default */
+  position: fixed;
+  /* Stay in place */
+  z-index: 1000;
+  /* Sit on top */
+  left: 0;
+  top: 0;
+  width: 100%;
+  height: 100%;
+  overflow: auto;
+  /* Enable scroll if needed */
+  background-color: rgb(0, 0, 0);
+  /* Fallback color */
+  background-color: rgba(0, 0, 0, 0.4);
+  /* Black w/ opacity */
+  padding-top: 60px;
+}
+
+/* Add styles to the form container */
+.form-container {
+  background-color: #fefefe;
+  margin: 5% auto 15% auto;
+  /* 5% from the top, 15% from the bottom and centered */
+  border: 1px solid #888;
+  width: 40%;
+  /* Could be more or less, depending on screen size */
+}
+
+.avatar img {
+  height: 128px;
+  width: 128px;
+}
+
+.container {
+  overflow: hidden;
+  padding: 32px;
+}
+
+input[type=text], input[type=password] {
+  width: 100%;
+  padding: 12px 20px;
+  margin: 8px 0;
+  display: inline-block;
+  border: 1px solid #ccc;
+  box-sizing: border-box;
+}
+
+.btn-submit {
+  width: 25%;
+  margin-top: 32px;
+}
+
+.btn-cancel {
+  width: 25%;
+  margin-top: 32px;
+  float: right;
+}
+
+/* Add Zoom Animation */
+.animate {
+  -webkit-animation: animatezoom 0.6s;
+  animation: animatezoom 0.6s
+}
+
+@-webkit-keyframes animatezoom {
+  from {
+    -webkit-transform: scale(0)
+  }
+
+  to {
+    -webkit-transform: scale(1)
+  }
+}
+
+@keyframes animatezoom {
+  from {
+    transform: scale(0)
+  }
+
+  to {
+    transform: scale(1)
+  }
+}
+
+.carousel {
+  width: 80%;
+  height: 600px;
+  margin: auto;
+}
+
+.carousel-inner {
+  height: 600px;
+}
+
+.carousel-caption {
+  height: 600px;
+}
+
+.cards {
+  width: 80%;
+  margin: auto;
+  text-align: center;
+  display: flex;
+  padding-top: 32px;
+}
+
+.card {
+  width: 200px;
+  margin: auto;
+  display: inline-block;
+>>>>>>> da09c8ec98cf59de9a117e9ad396a86cf54e6ec6
 }
 
 .card img {
