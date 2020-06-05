@@ -1,9 +1,4 @@
-<<<<<<< HEAD
-//nodemon app.js --signal SIGKILL -e js,html,ejs
-//nodemon app.js -e js,html,ejs,css
-=======
 //nodemon app.js --signal SIGKILL -e js,html,ejs,css
->>>>>>> da09c8ec98cf59de9a117e9ad396a86cf54e6ec6
 
 //jshint esversion:6
 
@@ -36,7 +31,7 @@ app.use(session({
 app.use(passport.initialize());
 app.use(passport.session());
 
-mongoose.connect("mongodb://localhost:27017/users", {
+mongoose.connect("mongodb://localhost:27017/babies", {
   useNewUrlParser: true,
   useUnifiedTopology: true
 });
@@ -106,6 +101,11 @@ app.get("/auth/google/authentication",
   function(req, res) {
     res.redirect("/");
   });
+
+app.get("/shop", function(req, res) {
+  console.log("dkjfghsdkhf");
+  res.render("shop");
+});
 
 app.post("/register", function(req, res) {
   User.register({

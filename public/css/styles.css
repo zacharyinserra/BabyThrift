@@ -1,31 +1,4 @@
 .header {
-<<<<<<< HEAD
-  display: flex;
-  padding: 32px;
-}
-
-.welcome {
-  width: 50%;
-  float: left;
-  text-align: left;
-}
-
-.account {
-  width: 50%;
-  text-align: right;
-  margin: auto 0;
-}
-
-.slide {
-  margin: 32px;
-}
-
-.carousel-container {
-  width: 90%;
-  padding: 1px;
-  background-color: grey;
-  margin: auto;
-=======
   text-align: center;
   background-color: #9EC4C5;
   padding: 16px;
@@ -37,7 +10,6 @@
   width: 210px;
   float: left;
   text-align: left;
->>>>>>> da09c8ec98cf59de9a117e9ad396a86cf54e6ec6
 }
 
 .input-group {
@@ -46,18 +18,6 @@
   padding-right: 16px;
 }
 
-<<<<<<< HEAD
-.cards {
-  width: 80%;
-  display: flex;
-  margin: 64px auto auto auto;
-}
-
-.card {
-  width: 24%;
-  margin: 0 1%;
-  height: 375px;
-=======
 .register {
   width: 300px;
   float: right;
@@ -182,7 +142,6 @@ input[type=text], input[type=password] {
   width: 200px;
   margin: auto;
   display: inline-block;
->>>>>>> da09c8ec98cf59de9a117e9ad396a86cf54e6ec6
 }
 
 .card img {
