@@ -1,5 +1,20 @@
 <%- include('partials/header') %>
 
+<!-- Register/Login/Cart -->
+<div class="register">
+  <div id="ifauth">
+    <a class="btn btn-light btn-med" href="/register" role="button">Register</a>
+    <button class="btn btn-dark btn-med" onclick="openLogin()">Login</button>
+  </div>
+  <div id="ifnotauth">
+    <a class="btn btn-light btn-med" href="/account" role="button">Account</a>
+    <button class="btn btn-dark btn-med">Logout</button>
+  </div>
+
+  <a class="btn btn-light btn-med" href="#" role="button">CART</a>
+</div>
+</div>
+
 <!-- Nav bar -->
 <!-- <nav aria-label="breadcrumb">
   <ol class="breadcrumb">

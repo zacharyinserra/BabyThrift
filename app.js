@@ -21,7 +21,6 @@ app.use(bodyParser.urlencoded({
   extended: true
 }));
 app.use(express.static("public"));
-
 app.use(session({
   secret: process.env.SECRET,
   resave: false,
@@ -77,11 +76,14 @@ passport.use(new GoogleStrategy({
 ));
 
 app.get("/", function(req, res) {
-  console.log(req.isAuthenticated());
+  var check;
   if (req.isAuthenticated()) {
-    //dont load login and register buttons load logout option instead
+    check = true;
+  } else {
+    check = false;
   }
-  res.render("home");
+  res.render("home", {check: check});
+  //dont load login and register buttons load logout option instead
 });
 
 app.get("/register", function(req, res) {
@@ -102,9 +104,13 @@ app.get("/auth/google/authentication",
     res.redirect("/");
   });
 
-app.get("/shop", function(req, res) {
-  console.log("dkjfghsdkhf");
+app.get("/shop/:itemType", function(req, res) {
   res.render("shop");
+});
+
+app.get("/logout", function(req, res) {
+  req.logout();
+  res.redirect("/");
 });
 
 app.post("/register", function(req, res) {
