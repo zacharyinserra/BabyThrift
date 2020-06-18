@@ -30,6 +30,9 @@ app.use(session({
 app.use(passport.initialize());
 app.use(passport.session());
 
+
+// User Schema
+
 mongoose.connect("mongodb://localhost:27017/babies", {
   useNewUrlParser: true,
   useUnifiedTopology: true
@@ -47,6 +50,38 @@ userSchema.plugin(passportLocalMongoose);
 userSchema.plugin(findOrCreate);
 
 const User = new mongoose.model("User", userSchema);
+
+
+// Item Schema
+
+const itemSchema = new mongoose.Schema({
+  name: {
+    type: String,
+    required: true
+  },
+  itemType: {
+    type: String,
+    required: true
+  },
+  manufacturer: {
+    type: String
+  },
+  price: {
+    type: Number,
+    required: true
+  },
+  city: {
+    type: String,
+    required: true
+  },
+  state: {
+    type: String,
+    required: true
+  },
+  picture: String
+});
+
+const Item = new mongoose.model("Item", itemSchema);
 
 passport.use(User.createStrategy());
 
@@ -82,7 +117,9 @@ app.get("/", function(req, res) {
   } else {
     check = false;
   }
-  res.render("home", {check: check});
+  res.render("home", {
+    check: check
+  });
   //dont load login and register buttons load logout option instead
 });
 
@@ -105,7 +142,44 @@ app.get("/auth/google/authentication",
   });
 
 app.get("/shop/:itemType", function(req, res) {
-  res.render("shop");
+  var check;
+  if (req.isAuthenticated()) {
+    check = true;
+  } else {
+    check = false;
+  }
+
+  var itemsToRender = [];
+  var promise = new Promise(function(resolve, reject) {
+    Item.find({
+      itemType: req.params.itemType
+    }, function(err, items) {
+      if (err) {
+        console.log(err);
+      } else {
+        itemsToRender = items
+        itemsToRender.forEach(function(item) {
+          console.log(item.name);
+        });
+        if (itemsToRender.length !== 0) {
+          console.log("resolve");
+          resolve();
+        } else {
+          console.log("reject");
+          reject();
+        }
+      }
+    });
+  });
+  promise.then(function(result) {
+      res.render("shop", {
+        check: check,
+        itemList: itemsToRender
+      });
+    },
+    function(err) {
+      console.log(err);
+    });
 });
 
 app.get("/logout", function(req, res) {

@@ -2,26 +2,24 @@
 
 <!-- Register/Login/Cart -->
 <div class="register">
-  <div id="ifauth">
-    <a class="btn btn-light btn-med" href="/register" role="button">Register</a>
-    <button class="btn btn-dark btn-med" onclick="openLogin()">Login</button>
-  </div>
-  <div id="ifnotauth">
-    <a class="btn btn-light btn-med" href="/account" role="button">Account</a>
-    <button class="btn btn-dark btn-med">Logout</button>
-  </div>
+  <% if (check) { %>
+  <a class="btn btn-light btn-med" href="/account" role="button">Account</a>
+  <a class="btn btn-dark btn-med" href="/logout" role="button">Logout</button>
+  <% } else { %>
+  <a class="btn btn-light btn-med" href="/register" role="button">Register</a>
+  <button class="btn btn-dark btn-med" onclick="openLogin()">Login</button>
+  <% } %>
 
   <a class="btn btn-light btn-med" href="#" role="button">CART</a>
 </div>
 </div>
 
-<!-- Nav bar -->
-<!-- <nav aria-label="breadcrumb">
-  <ol class="breadcrumb">
-    <li class="breadcrumb-item"><a href="#">Home</a></li>
-    <li class="breadcrumb-item"><a href="#">Next Page</a></li>
-    <li class="breadcrumb-item active" aria-current="page">Next Next Page</li>
-  </ol>
-</nav> -->
+<!-- Display items for mf shopping -->
+
+<div class="card">
+  <% itemList.forEach(function(item) { %>
+    <div class="card-body"><%= item.name %></div>
+  <% }); %>
+</div>
 
 <%- include('partials/footer') %>
