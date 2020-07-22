@@ -59,7 +59,7 @@ one.save();
 
 var one = new Item({
   name: "hot wheels car",
-  itemType: "Toy",
+  itemType: "Toys",
   manufacturer: "Hot Wheels",
   price: 2.00,
   city: "Austin",
@@ -70,7 +70,7 @@ one.save();
 
 var one = new Item({
   name: "doll",
-  itemType: "Toy",
+  itemType: "Toys",
   manufacturer: "barbie",
   price: 3.50,
   city: "Charlotte",

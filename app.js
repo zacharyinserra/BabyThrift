@@ -157,15 +157,10 @@ app.get("/shop/:itemType", function(req, res) {
       if (err) {
         console.log(err);
       } else {
-        itemsToRender = items
-        itemsToRender.forEach(function(item) {
-          console.log(item.name);
-        });
+        itemsToRender = items;
         if (itemsToRender.length !== 0) {
-          console.log("resolve");
           resolve();
         } else {
-          console.log("reject");
           reject();
         }
       }
@@ -174,6 +169,7 @@ app.get("/shop/:itemType", function(req, res) {
   promise.then(function(result) {
       res.render("shop", {
         check: check,
+        itemType: req.params.itemType,
         itemList: itemsToRender
       });
     },

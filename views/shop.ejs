@@ -5,20 +5,35 @@
   <% if (check) { %>
   <a class="btn btn-light btn-med" href="/account" role="button">Account</a>
   <a class="btn btn-dark btn-med" href="/logout" role="button">Logout</button>
-  <% } else { %>
-  <a class="btn btn-light btn-med" href="/register" role="button">Register</a>
-  <button class="btn btn-dark btn-med" onclick="openLogin()">Login</button>
-  <% } %>
+    <% } else { %>
+    <a class="btn btn-light btn-med" href="/register" role="button">Register</a>
+    <button class="btn btn-dark btn-med" onclick="openLogin()">Login</button>
+    <% } %>
 
-  <a class="btn btn-light btn-med" href="#" role="button">CART</a>
+    <a class="btn btn-light btn-med" href="#" role="button">CART</a>
 </div>
 </div>
 
 <!-- Display items for mf shopping -->
 
-<div class="card">
+<div class="shopItems">
+  <h3><%= itemType %></h3>
   <% itemList.forEach(function(item) { %>
-    <div class="card-body"><%= item.name %></div>
+  <div class="shopItem">
+    <div class="itemTitle">
+      <p><%= item.name %></p>
+      <p><%= item.manufacturer %></p>
+    </div>
+    <div class="itemImage">
+      <img src="" alt="picture">
+    </div>
+    <div>
+      <p>$<%= item.price %> US</p>
+      <hr>
+      <p><b>Seller:</b> Yo mama</p>
+      <p><b>Location:</b> <%= item.city %>, <%= item.state %></p>
+    </div>
+  </div>
   <% }); %>
 </div>
 
