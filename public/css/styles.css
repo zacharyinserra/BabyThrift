@@ -19,7 +19,7 @@
 }
 
 .register {
-  width: 300px;
+  width: 310px;
   float: right;
   text-align: right;
 }
@@ -239,6 +239,35 @@ input[type=password] {
 
 .itemImage {
   height: 100px;
+}
+
+/* Item Upload Page */
+.itemDetails {
+  width: 75%;
+  margin: auto;
+}
+
+input[type="file"] {
+  display: none;
+}
+
+.custom-file-upload {
+  border: 1px solid #ccc;
+  display: inline-block;
+  padding: 6px 12px;
+  cursor: pointer;
+}
+
+#images {
+  display: none;
+  height: 300px;
+}
+
+.product-images {
+  /* width: 200px; */
+  height: 300px;
+  padding-right: 15px;
+  padding-bottom: 15px;
 }
 
 /* footer */

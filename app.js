@@ -7,11 +7,13 @@ const express = require("express");
 const session = require("express-session");
 const ejs = require("ejs");
 const bodyParser = require("body-parser");
+const mongo = require("mongodb");
 const mongoose = require("mongoose");
 const passport = require("passport");
 const passportLocalMongoose = require("passport-local-mongoose");
 const findOrCreate = require("mongoose-findorcreate");
 const GoogleStrategy = require("passport-google-oauth20").Strategy;
+const AWS = require('aws-sdk');
 
 const app = express();
 
@@ -83,13 +85,35 @@ const itemSchema = new mongoose.Schema({
 
 const Item = new mongoose.model("Item", itemSchema);
 
+// AWS S3
+
+const bucketName = "itemimagesbbthr";
+const bucketRegion = "us-east-2";
+const IdentityPoolId = process.env.IDENTITY_POOL_ID;
+
+AWS.config.update({
+  region: bucketRegion,
+  credentials: new AWS.CognitoIdentityCredentials({
+    IdentityPoolId: IdentityPoolId
+  })
+});
+
+var s3 = new AWS.S3({
+  apiVersion: "2006-03-01",
+  params: {
+    Bucket: bucketName
+  }
+});
+
+// Google Passport
+
 passport.use(User.createStrategy());
 
-passport.serializeUser(function(user, done) {
+passport.serializeUser(function (user, done) {
   done(null, user.id);
 });
-passport.deserializeUser(function(id, done) {
-  User.findById(id, function(err, user) {
+passport.deserializeUser(function (id, done) {
+  User.findById(id, function (err, user) {
     done(err, user);
   });
 });
@@ -100,17 +124,19 @@ passport.use(new GoogleStrategy({
     callbackURL: "http://localhost:3000/auth/google/authentication",
     userProfileURL: "https://www.googleapis.com/oauth2/v3/userinfo",
   },
-  function(accessToken, refreshToken, profile, cb) {
+  function (accessToken, refreshToken, profile, cb) {
     console.log(profile);
     User.findOrCreate({
       googleId: profile.id
-    }, function(err, user) {
+    }, function (err, user) {
       return cb(err, user);
     });
   }
 ));
 
-app.get("/", function(req, res) {
+// app stuff
+
+app.get("/", function (req, res) {
   var check;
   if (req.isAuthenticated()) {
     check = true;
@@ -123,7 +149,7 @@ app.get("/", function(req, res) {
   //dont load login and register buttons load logout option instead
 });
 
-app.get("/register", function(req, res) {
+app.get("/register", function (req, res) {
   res.render("register");
 });
 
@@ -137,23 +163,29 @@ app.get("/auth/google/authentication",
   passport.authenticate("google", {
     failureRedirect: "/login"
   }),
-  function(req, res) {
+  function (req, res) {
     res.redirect("/");
   });
 
-app.get("/shop/:itemType", function(req, res) {
-  var check;
-  if (req.isAuthenticated()) {
-    check = true;
-  } else {
-    check = false;
-  }
+app.get("/itemUpload", function (req, res) {
+  // var check;
+  // if (req.isAuthenticated()) {
+  //   check = true;
+  // } else {
+  //   check = false;
+  // }
+  res.render("itemUpload", {
+    check: isAuth(req)
+  });
+});
+
+app.get("/shop/:itemType", function (req, res) {
 
   var itemsToRender = [];
-  var promise = new Promise(function(resolve, reject) {
+  var promise = new Promise(function (resolve, reject) {
     Item.find({
       itemType: req.params.itemType
-    }, function(err, items) {
+    }, function (err, items) {
       if (err) {
         console.log(err);
       } else {
@@ -166,55 +198,82 @@ app.get("/shop/:itemType", function(req, res) {
       }
     });
   });
-  promise.then(function(result) {
+  promise.then(function (result) {
       res.render("shop", {
-        check: check,
+        check: isAuth(req),
         itemType: req.params.itemType,
         itemList: itemsToRender
       });
     },
-    function(err) {
+    function (err) {
       console.log(err);
     });
 });
 
-app.get("/logout", function(req, res) {
+app.get("/logout", function (req, res) {
   req.logout();
   res.redirect("/");
 });
 
-app.post("/register", function(req, res) {
+app.post("/register", function (req, res) {
   User.register({
     username: req.body.username
-  }, req.body.password, function(err, user) {
+  }, req.body.password, function (err, user) {
     if (err) {
       console.log(err);
       res.redirect("/register");
     } else {
-      passport.authenticate("local")(req, res, function() {
+      passport.authenticate("local")(req, res, function () {
         res.redirect("/");
       });
     }
   });
 });
 
-app.post("/login", function(req, res) {
+app.post("/login", function (req, res) {
   const user = new User({
     username: req.body.username,
     password: req.body.password
   });
 
-  req.login(user, function(err) {
+  req.login(user, function (err) {
     if (err) {
       console.log(err);
     } else {
-      passport.authenticate("local")(req, res, function() {
+      passport.authenticate("local")(req, res, function () {
         res.redirect("/");
       });
     }
   });
 });
 
-app.listen(3000, function() {
+app.post("/addPhoto", function(req, res) {
+  console.log("help");
+  console.log(req.body.images);
+});
+
+app.post("/databaseAdd", function (req, res) {
+
+});
+
+function isAuth(req) {
+  var check;
+  if (req.isAuthenticated()) {
+    check = true;
+  } else {
+    check = false;
+  }
+  return check;
+}
+
+function addImage(req) {
+  var files = req.body.picsOfItem;
+  if (!files.length) {
+    return alert("Please choose a file to upload first.");
+  }
+
+}
+
+app.listen(3000, function () {
   console.log("Server running on port 3000...");
 });
