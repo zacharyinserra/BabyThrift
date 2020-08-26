@@ -260,7 +260,10 @@ input[type="file"] {
 
 #images {
   display: none;
-  height: 300px;
+  max-height: 300px;
+  overflow-x: scroll;
+  overflow-y: hidden;
+  white-space: nowrap;
 }
 
 .product-images {

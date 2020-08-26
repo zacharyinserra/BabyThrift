@@ -16,10 +16,11 @@
 
 
 <div class="itemDetails">
-    <form action="databaseAdd" method="POST">
+    <form action="databaseAdd" method="POST" enctype="multipart/form-data">
+        <!-- <form> -->
         <div class="form-group">
-            <label for="formGroupExampleInput">Name of item:</label>
-            <input name="nameOfItem" type="text" class="form-control" id="formGroupExampleInput" placeholder="">
+            <label for="name">Name of item:</label>
+            <input name="nameOfItem" type="text" class="form-control" id="name" placeholder="">
         </div>
         <div class="form-group">
             <label class="btn btn-primary btn-lg" for="image-file">Upload Images</label>
@@ -27,21 +28,19 @@
         </div>
         <div id="images">
             <!-- Uhhhhhhh images  -->
-
         </div>
         <div class="form-group">
-            <label for="formGroupExampleInput2">Manufacturer (if applciable):</label>
-            <input name="manufacturerOfItem" type="text" class="form-control" id="formGroupExampleInput2"
-                placeholder="">
+            <label for="manufacturer">Manufacturer (if applciable):</label>
+            <input name="manufacturerOfItem" type="text" class="form-control" id="manufacturer" placeholder="">
         </div>
         <div class="form-group">
-            <label for="formGroupExampleInput3">Asking price:</label>
-            <input name="priceOfItem" type="text" class="form-control" id="formGroupExampleInput3" placeholder="">
+            <label for="price">Asking price:</label>
+            <input name="priceOfItem" type="text" class="form-control" id="price" placeholder="">
         </div>
         <div class="form-group">
-            <label for="formGroupExampleInput4">City, State</label>
-            <input name="cityOfItem" type="text" class="form-control" id="formGroupExampleInput4" placeholder="">
-            <select name="stateOfItem" class="btn btn-secondary dropdown-toggle">
+            <label for="city">City, State</label>
+            <input name="cityOfItem" type="text" class="form-control" id="city placeholder="">
+            <select id="state" name="stateOfItem" class="btn btn-secondary dropdown-toggle">
                 <option value="AL">Alabama</option>
                 <option value="AK">Alaska</option>
                 <option value="AZ">Arizona</option>
@@ -95,7 +94,7 @@
                 <option value="WY">Wyoming</option>
             </select>
         </div>
-        <button type="button" class="btn btn-primary btn-lg btn-block">Add Item!</button>
+        <button id="addItems" class="btn btn-primary btn-lg btn-block">Add Item!</button>
     </form>
 </div>
 

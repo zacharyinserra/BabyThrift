@@ -3,6 +3,14 @@
 //jshint esversion:6
 
 require('dotenv').config();
+
+const fs = require("fs");
+const File = require("file-class");
+const Blob = require('blob');
+const fetch = require("node-fetch");
+const request = require("request");
+const uuid = require("uuid");
+
 const express = require("express");
 const session = require("express-session");
 const ejs = require("ejs");
@@ -14,6 +22,7 @@ const passportLocalMongoose = require("passport-local-mongoose");
 const findOrCreate = require("mongoose-findorcreate");
 const GoogleStrategy = require("passport-google-oauth20").Strategy;
 const AWS = require('aws-sdk');
+const multer = require('multer')
 
 const app = express();
 
@@ -21,6 +30,9 @@ app.set("view engine", "ejs");
 
 app.use(bodyParser.urlencoded({
   extended: true
+}));
+app.use(express.json({
+  type: ["application/json", "text/plain"]
 }));
 app.use(express.static("public"));
 app.use(session({
@@ -31,6 +43,21 @@ app.use(session({
 
 app.use(passport.initialize());
 app.use(passport.session());
+
+
+// multer
+
+const storage = multer.diskStorage({
+  destination: function (req, file, cb) {
+    cb(null, "C:/Code/BabyThrift/tmp-images")
+  },
+  filename: function (req, file, cb) {
+    cb(null, uuidv4() + ".png")
+  }
+})
+const upload = multer({
+  storage: storage
+});
 
 
 // User Schema
@@ -85,18 +112,29 @@ const itemSchema = new mongoose.Schema({
 
 const Item = new mongoose.model("Item", itemSchema);
 
+
 // AWS S3
 
-const bucketName = "itemimagesbbthr";
-const bucketRegion = "us-east-2";
+const bucketName = process.env.BUCKETNAME;
+const bucketRegion = process.env.BUCKETREGION;
 const IdentityPoolId = process.env.IDENTITY_POOL_ID;
 
-AWS.config.update({
-  region: bucketRegion,
-  credentials: new AWS.CognitoIdentityCredentials({
-    IdentityPoolId: IdentityPoolId
-  })
-});
+// AWS.config.update({
+//   region: bucketRegion,
+//   credentials: new AWS.CognitoIdentityCredentials({
+//     IdentityPoolId: IdentityPoolId
+//   })
+// });
+
+AWS.config = new AWS.Config();
+AWS.config.accessKeyId = process.env.ACCESSKEY;
+AWS.config.secretAccessKey = process.env.SECRETKEY;
+AWS.config.region = "us-east-2";
+
+// AWS.config.region = 'us-east-2'; // Region
+// AWS.config.credentials = new AWS.CognitoIdentityCredentials({
+//     IdentityPoolId: 'us-east-2:a5650762-998f-451d-a72b-a6af062404f7',
+// });
 
 var s3 = new AWS.S3({
   apiVersion: "2006-03-01",
@@ -247,12 +285,61 @@ app.post("/login", function (req, res) {
   });
 });
 
-app.post("/addPhoto", function(req, res) {
-  console.log("help");
-  console.log(req.body.images);
-});
+app.post("/databaseAdd", upload.array("itemImages"), function (req, res) {
 
-app.post("/databaseAdd", function (req, res) {
+  // Upload image files to s3 bucket
+
+  var files = fs.readdirSync(__dirname + "/tmp-images");
+  // console.log(files);
+
+  var promises = [];
+
+  files.forEach(item => {
+    var fileContent = fs.readFileSync(__dirname + "/tmp-images/" + item);
+
+    var params = {
+      Bucket: bucketName,
+      Key: "item-images/" + item,
+      ACL: "public-read",
+      Body: fileContent
+    };
+
+    promises.push(
+      new Promise(function (resolve, reject) {
+        s3.upload(params, function (err, data) {
+          if (err) {
+            console.log(err);
+            reject();
+          } else {
+            console.log(`File uploaded successfully. ${data.Location}`);
+            resolve();
+          }
+        })
+      })
+      .then(function (result) {
+        //console.log("test");
+      }).catch(function (err) {
+        console.log(err);
+      })
+    )
+  });
+
+  // Waits till all files uploaded
+  Promise.all(promises).then(() => {
+    console.log("Upload complete.");
+    files.forEach(item => {
+      fs.unlink(__dirname + "/tmp-images/" + item, err => {
+        if (err) {
+          console.log(err);
+        }
+      });
+    });
+    console.log("Temp files deleted.");
+    res.redirect("/itemUpload");
+  });
+
+  // Do databse add of item as long as everything works
+
 
 });
 
@@ -266,12 +353,12 @@ function isAuth(req) {
   return check;
 }
 
-function addImage(req) {
-  var files = req.body.picsOfItem;
-  if (!files.length) {
-    return alert("Please choose a file to upload first.");
-  }
-
+function uuidv4() {
+  return 'xxxxxxxx-xxxx-4xxx-yxxx-xxxxxxxxxxxx'.replace(/[xy]/g, function (c) {
+    var r = Math.random() * 16 | 0,
+      v = c == 'x' ? r : (r & 0x3 | 0x8);
+    return v.toString(16);
+  });
 }
 
 app.listen(3000, function () {
