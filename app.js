@@ -287,6 +287,13 @@ app.post("/login", function (req, res) {
 
 app.post("/databaseAdd", upload.array("itemImages"), function (req, res) {
 
+  var name = req.body.nameOfItem;
+  var type = req.body.typeOfItem;
+  var manufacturer = req.body.manufacturerOfItem;
+  var price = req.body.priceOfItem;
+  var city = req.body.cityOfItem;
+  var state = req.body.stateOfItem;
+
   // Upload image files to s3 bucket
 
   var files = fs.readdirSync(__dirname + "/tmp-images");
@@ -320,6 +327,7 @@ app.post("/databaseAdd", upload.array("itemImages"), function (req, res) {
         //console.log("test");
       }).catch(function (err) {
         console.log(err);
+        res.redirect("/uploadError");
       })
     )
   });
@@ -328,19 +336,39 @@ app.post("/databaseAdd", upload.array("itemImages"), function (req, res) {
   Promise.all(promises).then(() => {
     console.log("Upload complete.");
     files.forEach(item => {
+      // Delete temp image files
       fs.unlink(__dirname + "/tmp-images/" + item, err => {
         if (err) {
           console.log(err);
+          res.redirect("/uploadError");
         }
       });
     });
     console.log("Temp files deleted.");
-    res.redirect("/itemUpload");
+
+    // Do database add of item as long as everything works
+
+    var dbItem = new Item({
+      name: name,
+      itemType: type,
+      manufacturer: manufacturer,
+      price: price,
+      city: city,
+      state: state,
+      picture: files.join(";")
+    });
+    dbItem.save(function (err, doc) {
+      if (err) {
+        console.log(err);
+        res.redirect("/uploadError");
+      } else {
+        console.log("Item added succesfully");
+        console.log(doc);
+      }
+    });
+
+    res.redirect("/account");
   });
-
-  // Do databse add of item as long as everything works
-
-
 });
 
 function isAuth(req) {

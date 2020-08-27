@@ -20,27 +20,36 @@
         <!-- <form> -->
         <div class="form-group">
             <label for="name">Name of item:</label>
-            <input name="nameOfItem" type="text" class="form-control" id="name" placeholder="">
+            <input name="nameOfItem" type="text" class="form-control" id="name" placeholder="" required>
+        </div>
+        <div class="form-group">
+            <label for="type">Type of item:</label><br>
+            <select id="type" name="typeOfItem" class="btn btn-secondary btn-lg dropdown-toggle" required>
+                <option value="Clothing">Clothing</option>
+                <option value="Furniture">Furniture</option>
+                <option value="Toys">Toys</option>
+                <option value="Stroller">Stroller</option>
+            </select>
         </div>
         <div class="form-group">
             <label class="btn btn-primary btn-lg" for="image-file">Upload Images</label>
-            <input class="custom-file-upload" type="file" id="image-file" name="itemImages" accept="images/*" multiple>
+            <input class="custom-file-upload" type="file" id="image-file" name="itemImages" accept="images/*" multiple required>
         </div>
         <div id="images">
             <!-- Uhhhhhhh images  -->
         </div>
         <div class="form-group">
             <label for="manufacturer">Manufacturer (if applciable):</label>
-            <input name="manufacturerOfItem" type="text" class="form-control" id="manufacturer" placeholder="">
+            <input name="manufacturerOfItem" type="text" class="form-control" id="manufacturer" placeholder="" required>
         </div>
         <div class="form-group">
             <label for="price">Asking price:</label>
-            <input name="priceOfItem" type="text" class="form-control" id="price" placeholder="">
+            <input name="priceOfItem" type="text" class="form-control" id="price" placeholder="" required>
         </div>
         <div class="form-group">
             <label for="city">City, State</label>
-            <input name="cityOfItem" type="text" class="form-control" id="city placeholder="">
-            <select id="state" name="stateOfItem" class="btn btn-secondary dropdown-toggle">
+            <input name="cityOfItem" type="text" class="form-control" id="city" placeholder="" required>
+            <select id="state" name="stateOfItem" class="btn btn-secondary dropdown-toggle" required>
                 <option value="AL">Alabama</option>
                 <option value="AK">Alaska</option>
                 <option value="AZ">Arizona</option>
