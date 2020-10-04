@@ -14,3 +14,10 @@ function openNav() {
 function closeNav() {
   document.getElementById("mySidenav").style.width = "0";
 }
+
+function setMainImage(img) {
+  var src = img.src;
+  $(".displayed-image").attr("src", src);
+  $(".tiny-images").attr("class", "tiny-images");
+  $(img).attr("class", "tiny-images selected-image");
+}

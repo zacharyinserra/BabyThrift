@@ -15,26 +15,48 @@
 </div>
 
 <!-- Display items for mf shopping -->
-
 <div class="shopItems">
   <h3><%= itemType %></h3>
   <% itemList.forEach(function(item) { %>
-  <div class="shopItem">
-    <div class="itemTitle">
-      <p><%= item.name %></p>
-      <p><%= item.manufacturer %></p>
+  <a class="shopItemLinks" href="/item/<%= item.id %>">
+    <div class="shopItem">
+      <div class="itemTitle">
+        <p><%= item.name %></p>
+      </div>
+      <div class="itemImage">
+        <img
+          src="https://kuiperbeltofbabies.s3.us-east-2.amazonaws.com/item-images/<%= item.picture.toString().split(";")[0] %>"
+          alt="picture">
+      </div>
+      <div>
+        <p>$<%= item.price %></p>
+        <hr>
+        <p><b>Seller:</b> Yo mama</p>
+        <p><b>Location:</b> <%= item.city %>, <%= item.state %></p>
+      </div>
     </div>
-    <div class="itemImage">
-      <img src="" alt="picture">
-    </div>
-    <div>
-      <p>$<%= item.price %> US</p>
-      <hr>
-      <p><b>Seller:</b> Yo mama</p>
-      <p><b>Location:</b> <%= item.city %>, <%= item.state %></p>
-    </div>
-  </div>
+  </a>
   <% }); %>
 </div>
+
+<nav aria-label="Page navigation example">
+  <ul class="pagination justify-content-center">
+    <li class="page-item">
+      <a class="page-link" href="#" aria-label="Previous">
+        <span aria-hidden="true">&laquo;</span>
+        <span class="sr-only">Previous</span>
+      </a>
+    </li>
+    <li class="page-item active"><a class="page-link" href="#">1</a></li>
+    <li class="page-item"><a class="page-link" href="#">2</a></li>
+    <li class="page-item"><a class="page-link" href="#">3</a></li>
+    <li class="page-item">
+      <a class="page-link" href="#" aria-label="Next">
+        <span aria-hidden="true">&raquo;</span>
+        <span class="sr-only">Next</span>
+      </a>
+    </li>
+  </ul>
+</nav>
 
 <%- include('partials/footer') %>

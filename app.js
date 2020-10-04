@@ -5,12 +5,6 @@
 require('dotenv').config();
 
 const fs = require("fs");
-const File = require("file-class");
-const Blob = require('blob');
-const fetch = require("node-fetch");
-const request = require("request");
-const uuid = require("uuid");
-
 const express = require("express");
 const session = require("express-session");
 const ejs = require("ejs");
@@ -49,7 +43,7 @@ app.use(passport.session());
 
 const storage = multer.diskStorage({
   destination: function (req, file, cb) {
-    cb(null, "C:/Code/BabyThrift/tmp-images")
+    cb(null, "C:/Code/BabyThrift/tmp-images") //switch to dirname
   },
   filename: function (req, file, cb) {
     cb(null, uuidv4() + ".png")
@@ -88,6 +82,10 @@ const itemSchema = new mongoose.Schema({
     type: String,
     required: true
   },
+  description: {
+    type: String,
+    required: true
+  },
   itemType: {
     type: String,
     required: true
@@ -119,22 +117,10 @@ const bucketName = process.env.BUCKETNAME;
 const bucketRegion = process.env.BUCKETREGION;
 const IdentityPoolId = process.env.IDENTITY_POOL_ID;
 
-// AWS.config.update({
-//   region: bucketRegion,
-//   credentials: new AWS.CognitoIdentityCredentials({
-//     IdentityPoolId: IdentityPoolId
-//   })
-// });
-
 AWS.config = new AWS.Config();
 AWS.config.accessKeyId = process.env.ACCESSKEY;
 AWS.config.secretAccessKey = process.env.SECRETKEY;
 AWS.config.region = "us-east-2";
-
-// AWS.config.region = 'us-east-2'; // Region
-// AWS.config.credentials = new AWS.CognitoIdentityCredentials({
-//     IdentityPoolId: 'us-east-2:a5650762-998f-451d-a72b-a6af062404f7',
-// });
 
 var s3 = new AWS.S3({
   apiVersion: "2006-03-01",
@@ -205,20 +191,13 @@ app.get("/auth/google/authentication",
     res.redirect("/");
   });
 
-app.get("/itemUpload", function (req, res) {
-  // var check;
-  // if (req.isAuthenticated()) {
-  //   check = true;
-  // } else {
-  //   check = false;
-  // }
-  res.render("itemUpload", {
+app.get("/item-upload", function (req, res) {
+  res.render("item-upload", {
     check: isAuth(req)
   });
 });
 
 app.get("/shop/:itemType", function (req, res) {
-
   var itemsToRender = [];
   var promise = new Promise(function (resolve, reject) {
     Item.find({
@@ -285,9 +264,66 @@ app.post("/login", function (req, res) {
   });
 });
 
+app.get("/account", function (req, res) {
+  res.render("account", {
+    check: isAuth(req)
+  });
+});
+
+app.get("/item/:itemID", function (req, res) {
+  var name;
+  var desc;
+  var manufacturer;
+  var price;
+  var city;
+  var state;
+  var pics;
+
+  var promise = new Promise(function (resolve, reject) {
+    Item.findOne({
+      _id: req.params.itemID
+    }, function (err, item) {
+      name = item.name;
+      desc = item.description;
+      manufacturer = item.manufacturer;
+      price = item.price;
+      city = item.city;
+      state = item.state;
+      pics = item.picture;
+      if (err) {
+        console.log(err);
+      } else {
+        if (item) {
+          resolve();
+        } else {
+          reject();
+        }
+      }
+    });
+  });
+
+  promise.then(function (result) {
+      pics = pics.split(";");
+      res.render("item", {
+        check: isAuth(req),
+        itemName: name,
+        itemDesc: desc,
+        itemManu: manufacturer,
+        itemPrice: price,
+        itemCity: city,
+        itemState: state,
+        itemPics: pics
+      });
+    },
+    function (err) {
+      console.log(err);
+    });
+});
+
 app.post("/databaseAdd", upload.array("itemImages"), function (req, res) {
 
   var name = req.body.nameOfItem;
+  var desc = req.body.descriptionOfItem;
   var type = req.body.typeOfItem;
   var manufacturer = req.body.manufacturerOfItem;
   var price = req.body.priceOfItem;
@@ -350,6 +386,7 @@ app.post("/databaseAdd", upload.array("itemImages"), function (req, res) {
 
     var dbItem = new Item({
       name: name,
+      description: desc,
       itemType: type,
       manufacturer: manufacturer,
       price: price,

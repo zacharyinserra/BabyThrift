@@ -1,0 +1,48 @@
+<%- include('partials/header') %>
+<!-- Register/Login/Cart -->
+<div class="register">
+    <% if (check) { %>
+    <a class="btn btn-light btn-med" href="/account" role="button">Account</a>
+    <a class="btn btn-dark btn-med" href="/logout" role="button">Logout</button>
+        <% } else { %>
+        <a class="btn btn-light btn-med" href="/register" role="button">Register</a>
+        <button class="btn btn-dark btn-med" onclick="openLogin()">Login</button>
+        <% } %>
+
+        <a class="btn btn-light btn-med" href="#" role="button">CART</a>
+</div>
+</div>
+
+<div class="upload-item">
+    <form class="form-inline" method="GET" action="item-upload">
+        <label for="sellbutt">Have something you want to sell?</label>
+        <button id="sellbutt" type="submit" class="btn btn-primary mb-2">Sell it!</button>
+    </form>
+</div>
+
+<div class="account-content">
+    <a class="account-item orders" href="/pending-orders">
+        <h2 class="account-link">Your orders</h2>
+    </a>
+    <a class="account-item items" href="/items-for-sale">
+        <h2 class="account-link">Your listed items</h2>
+    </a>
+    <a class="account-item settings" href="/account-settings">
+        <h2 class="account-link">Account settings</h2>
+    </a>
+</div>
+
+<div class="recent-orders">
+    <div class="order">
+
+    </div>
+    <div>
+
+    </div>
+    <div>
+
+    </div>
+    <button>View all orders</button>
+</div>
+
+<%- include('partials/footer') %>
