@@ -32,17 +32,38 @@
     </a>
 </div>
 
+<!-- Recent orders and uploaded items -->
+<!-- <div class="recent"> -->
 <div class="recent-orders">
     <div class="order">
 
     </div>
-    <div>
-
-    </div>
-    <div>
-
-    </div>
-    <button>View all orders</button>
+    <button class="expand-button">View all orders</button>
 </div>
+<div class="recent-items">
+    <div class="account-user-item">
+        <% itemList.forEach(function(item) { %>
+        <a class="account-shop-item-links" href="/item/<%= item.id %>">
+            <div class="account-shop-item">
+                <div class="itemTitle">
+                    <p><%= item.name %></p>
+                </div>
+                <div class="itemImage">
+                    <img src="https://kuiperbeltofbabies.s3.us-east-2.amazonaws.com/item-images/<%= item.picture.toString().split(";")[0] %>"
+                        alt="picture">
+                </div>
+                <div>
+                    <p>$<%= item.price %></p>
+                    <hr>
+                    <p><b>Seller:</b> Yo mama</p>
+                    <p><b>Location:</b> <%= item.city %>, <%= item.state %></p>
+                </div>
+            </div>
+        </a>
+        <% }); %>
+    </div>
+    <button class="expand-button">View of your items</button>
+</div>
+<!-- </div> -->
 
 <%- include('partials/footer') %>

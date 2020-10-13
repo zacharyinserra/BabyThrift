@@ -39,6 +39,10 @@ app.use(passport.initialize());
 app.use(passport.session());
 
 
+// Constants
+var userID = "";
+var isGoogleAuth = null;
+
 // multer
 
 const storage = multer.diskStorage({
@@ -78,6 +82,10 @@ const User = new mongoose.model("User", userSchema);
 // Item Schema
 
 const itemSchema = new mongoose.Schema({
+  userID: {
+    type: String,
+    required: true
+  },
   name: {
     type: String,
     required: true
@@ -142,6 +150,9 @@ passport.deserializeUser(function (id, done) {
   });
 });
 
+
+// Google auth route
+
 passport.use(new GoogleStrategy({
     clientID: process.env.CLIENT_ID,
     clientSecret: process.env.CLIENT_SECRET,
@@ -149,26 +160,23 @@ passport.use(new GoogleStrategy({
     userProfileURL: "https://www.googleapis.com/oauth2/v3/userinfo",
   },
   function (accessToken, refreshToken, profile, cb) {
-    console.log(profile);
+    // Is google authentication
     User.findOrCreate({
       googleId: profile.id
     }, function (err, user) {
+      isGoogleAuth = true;
+      userID = user._id;
       return cb(err, user);
     });
   }
 ));
 
-// app stuff
+
+// API routes
 
 app.get("/", function (req, res) {
-  var check;
-  if (req.isAuthenticated()) {
-    check = true;
-  } else {
-    check = false;
-  }
   res.render("home", {
-    check: check
+    check: isAuth(req)
   });
   //dont load login and register buttons load logout option instead
 });
@@ -190,6 +198,82 @@ app.get("/auth/google/authentication",
   function (req, res) {
     res.redirect("/");
   });
+
+app.get("/logout", function (req, res) {
+  isGoogleAuth = null;
+  userID = "";
+  req.logout();
+  res.redirect("/");
+});
+
+app.post("/register", function (req, res) {
+  User.register({
+    username: req.body.username
+  }, req.body.password, function (err, user) {
+    if (err) {
+      console.log(err);
+      res.redirect("/register");
+    } else {
+      passport.authenticate("local")(req, res, function () {
+        res.redirect("/");
+      });
+    }
+  });
+});
+
+app.post("/login", function (req, res) {
+  const user = new User({
+    username: req.body.username,
+    password: req.body.password
+  });
+
+  req.login(user, function (err) {
+    if (err) {
+      console.log(err);
+    } else {
+      passport.authenticate("local")(req, res, function () {
+        // Not google authentication
+        isGoogleAuth = false;
+        userID = req.user._id;
+        res.redirect("/");
+      });
+    }
+  });
+});
+
+app.get("/account", function (req, res) {
+  var itemsToRender = [];
+  // Retreive items from database for specific user based on their ID
+  var promise = new Promise(function (resolve, reject) {
+    Item.find({
+      userID: userID
+    }, function (err, items) {
+      if (err) {
+        console.log(err);
+      } else {
+        itemsToRender = items;
+        if (itemsToRender.length !== 0) {
+          resolve();
+        } else {
+          reject();
+        }
+      }
+    });
+  });
+  promise.then(function (result) {
+      res.render("account", {
+        check: isAuth(req),
+        itemList: itemsToRender
+      });
+    },
+    function (err) {
+      console.log(err);
+      res.render("account", {
+        check: isAuth(req),
+        itemList: itemsToRender
+      });
+    });
+});
 
 app.get("/item-upload", function (req, res) {
   res.render("item-upload", {
@@ -225,49 +309,6 @@ app.get("/shop/:itemType", function (req, res) {
     function (err) {
       console.log(err);
     });
-});
-
-app.get("/logout", function (req, res) {
-  req.logout();
-  res.redirect("/");
-});
-
-app.post("/register", function (req, res) {
-  User.register({
-    username: req.body.username
-  }, req.body.password, function (err, user) {
-    if (err) {
-      console.log(err);
-      res.redirect("/register");
-    } else {
-      passport.authenticate("local")(req, res, function () {
-        res.redirect("/");
-      });
-    }
-  });
-});
-
-app.post("/login", function (req, res) {
-  const user = new User({
-    username: req.body.username,
-    password: req.body.password
-  });
-
-  req.login(user, function (err) {
-    if (err) {
-      console.log(err);
-    } else {
-      passport.authenticate("local")(req, res, function () {
-        res.redirect("/");
-      });
-    }
-  });
-});
-
-app.get("/account", function (req, res) {
-  res.render("account", {
-    check: isAuth(req)
-  });
 });
 
 app.get("/item/:itemID", function (req, res) {
@@ -385,6 +426,7 @@ app.post("/databaseAdd", upload.array("itemImages"), function (req, res) {
     // Do database add of item as long as everything works
 
     var dbItem = new Item({
+      userID: userID,
       name: name,
       description: desc,
       itemType: type,

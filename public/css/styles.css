@@ -268,11 +268,19 @@ input[type="file"] {
 }
 
 #images {
-  display: none;
+  /* display: none; */
   max-height: 300px;
-  overflow-x: scroll;
+  height: 300px;
+  overflow-x: hidden;
   overflow-y: hidden;
   white-space: nowrap;
+  margin: auto;
+  border: solid;
+}
+
+.images-placeholder {
+  text-align: center;
+  padding-top: 100px;
 }
 
 .product-images {
@@ -309,9 +317,31 @@ input[type="file"] {
   text-decoration: none;
 }
 
+/* .recent {
+  display: flex;
+  width: 1200px;
+  margin: auto;
+} */
+
 .recent-orders {
   width: 1000px;
   margin: auto;
+  /* padding: 0 50px; */
+}
+
+.recent-items {
+  width: 1000px;
+  margin: auto;
+  /* padding: 0 50px; */
+}
+
+.account-user-item {
+  width: 100%;
+}
+
+.expand-button {
+  width: 100%;
+  margin-top: 0;
 }
 
 .order {

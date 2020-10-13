@@ -1,5 +1,10 @@
 $("#image-file").change(function (ev) {
 
+    
+    while (document.getElementById("images").firstChild) {
+        document.getElementById("images").removeChild(document.getElementById("images").firstChild);
+    }
+
     document.getElementById("images").style.display = "block";
 
     for (i = 0; i < this.files.length; i++) {
