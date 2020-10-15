@@ -43,6 +43,7 @@ app.use(passport.session());
 var userID = "";
 var isGoogleAuth = null;
 
+
 // multer
 
 const storage = multer.diskStorage({
@@ -137,6 +138,7 @@ var s3 = new AWS.S3({
   }
 });
 
+
 // Google Passport
 
 passport.use(User.createStrategy());
@@ -206,41 +208,6 @@ app.get("/logout", function (req, res) {
   res.redirect("/");
 });
 
-app.post("/register", function (req, res) {
-  User.register({
-    username: req.body.username
-  }, req.body.password, function (err, user) {
-    if (err) {
-      console.log(err);
-      res.redirect("/register");
-    } else {
-      passport.authenticate("local")(req, res, function () {
-        res.redirect("/");
-      });
-    }
-  });
-});
-
-app.post("/login", function (req, res) {
-  const user = new User({
-    username: req.body.username,
-    password: req.body.password
-  });
-
-  req.login(user, function (err) {
-    if (err) {
-      console.log(err);
-    } else {
-      passport.authenticate("local")(req, res, function () {
-        // Not google authentication
-        isGoogleAuth = false;
-        userID = req.user._id;
-        res.redirect("/");
-      });
-    }
-  });
-});
-
 app.get("/account", function (req, res) {
   var itemsToRender = [];
   // Retreive items from database for specific user based on their ID
@@ -276,9 +243,13 @@ app.get("/account", function (req, res) {
 });
 
 app.get("/item-upload", function (req, res) {
-  res.render("item-upload", {
-    check: isAuth(req)
-  });
+  if (isAuth(req)) {
+    res.render("item-upload", {
+      check: true
+    });
+  } else {
+    res.render("login");
+  }
 });
 
 app.get("/shop/:itemType", function (req, res) {
@@ -361,7 +332,46 @@ app.get("/item/:itemID", function (req, res) {
     });
 });
 
+app.post("/register", function (req, res) {
+  User.register({
+    username: req.body.username
+  }, req.body.password, function (err, user) {
+    if (err) {
+      console.log(err);
+      res.redirect("/register");
+    } else {
+      passport.authenticate("local")(req, res, function () {
+        res.redirect("/");
+      });
+    }
+  });
+});
+
+app.post("/login", function (req, res) {
+  const user = new User({
+    username: req.body.username,
+    password: req.body.password
+  });
+
+  req.login(user, function (err) {
+    if (err) {
+      console.log(err);
+    } else {
+      passport.authenticate("local")(req, res, function () {
+        // Not google authentication
+        isGoogleAuth = false;
+        userID = req.user._id;
+        res.redirect("/");
+      });
+    }
+  });
+});
+
 app.post("/databaseAdd", upload.array("itemImages"), function (req, res) {
+
+  if (userID === "") {
+    res.write("<h1>Sign in bitch<h1>");
+  }
 
   var name = req.body.nameOfItem;
   var desc = req.body.descriptionOfItem;
@@ -400,11 +410,12 @@ app.post("/databaseAdd", upload.array("itemImages"), function (req, res) {
           }
         })
       })
-      .then(function (result) {
-        //console.log("test");
-      }).catch(function (err) {
+      .then(function (result) {}).catch(function (err) {
         console.log(err);
-        res.redirect("/uploadError");
+        res.render("upload-error", {
+          check: true,
+          error: err
+        });
       })
     )
   });
@@ -412,12 +423,12 @@ app.post("/databaseAdd", upload.array("itemImages"), function (req, res) {
   // Waits till all files uploaded
   Promise.all(promises).then(() => {
     console.log("Upload complete.");
+
+    // Delete temp image files
     files.forEach(item => {
-      // Delete temp image files
       fs.unlink(__dirname + "/tmp-images/" + item, err => {
         if (err) {
           console.log(err);
-          res.redirect("/uploadError");
         }
       });
     });
@@ -436,17 +447,31 @@ app.post("/databaseAdd", upload.array("itemImages"), function (req, res) {
       state: state,
       picture: files.join(";")
     });
+    // console.log(dbItem._id);
     dbItem.save(function (err, doc) {
       if (err) {
         console.log(err);
-        res.redirect("/uploadError");
+        res.render("upload-error", {
+          check: true,
+          error: err
+        });
       } else {
         console.log("Item added succesfully");
-        console.log(doc);
+        // console.log(doc);
+        res.render("upload-success", {
+          check: true,
+          itemID: dbItem._id,
+          itemName: name,
+          itemDesc: desc,
+          itemType: type,
+          itemManu: manufacturer,
+          itemPrice: price,
+          itemCity: city,
+          itemState: state,
+          itemPics: files
+        });
       }
     });
-
-    res.redirect("/account");
   });
 });
 

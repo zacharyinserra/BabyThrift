@@ -236,10 +236,6 @@ input[type=password] {
   margin: 0;
 }
 
-.shopItemLinks {
-  /* fix */
-}
-
 .shopItemLinks:hover {
   text-decoration: none;
 }
@@ -344,10 +340,6 @@ input[type="file"] {
   margin-top: 0;
 }
 
-.order {
-  /* fix */
-}
-
 /* Single item page */
 
 .item-display {
@@ -386,6 +378,22 @@ input[type="file"] {
 
 .information {
   padding: 32px;
+}
+
+/* Item upload success page */
+
+.uploaded-item-head {
+  width: 1000px;
+  margin: auto;
+  padding: 50px 0;
+  text-align: center;
+}
+
+.uploaded-item-foot {
+  width: 1000px;
+  margin: auto;
+  padding: 50px 0;
+  text-align: center;
 }
 
 /* footer */
