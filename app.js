@@ -177,10 +177,32 @@ passport.use(new GoogleStrategy({
 // API routes
 
 app.get("/", function (req, res) {
-  res.render("home", {
-    check: isAuth(req)
+  var itemsToRender = [];
+  var promise = new Promise(function (resolve, reject) {
+    Item.find({
+  
+    }, function (err, items) {
+      if (err) {
+        console.log(err);
+      } else {
+        itemsToRender = items;
+        if (itemsToRender.length !== 0) {
+          resolve();
+        } else {
+          reject();
+        }
+      }
+    });
   });
-  //dont load login and register buttons load logout option instead
+  promise.then(function (result) {
+      res.render("home", {
+        check: isAuth(req),
+        itemList: itemsToRender
+      });
+    },
+    function (err) {
+      console.log(err);
+    });
 });
 
 app.get("/register", function (req, res) {

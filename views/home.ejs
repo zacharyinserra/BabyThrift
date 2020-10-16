@@ -6,16 +6,16 @@
   <% if (check) { %>
   <a class="btn btn-light btn-med" href="/account" role="button">Account</a>
   <a class="btn btn-dark btn-med" href="/logout" role="button">Logout</button>
-  <% } else { %>
-  <a class="btn btn-light btn-med" href="/register" role="button">Register</a>
-  <button class="btn btn-dark btn-med" onclick="openLogin()">Login</button>
-  <% } %>
+    <% } else { %>
+    <a class="btn btn-light btn-med" href="/register" role="button">Register</a>
+    <button class="btn btn-dark btn-med" onclick="openLogin()">Login</button>
+    <% } %>
 
-  <!-- </div> -->
-  <!-- <div id="ifnotauth" -->
-  <!-- </div> -->
+    <!-- </div> -->
+    <!-- <div id="ifnotauth" -->
+    <!-- </div> -->
 
-  <a class="btn btn-light btn-med" href="#" role="button">CART</a>
+    <a class="btn btn-light btn-med" href="#" role="button">CART</a>
 </div>
 </div>
 
@@ -68,6 +68,10 @@
 </div>
 
 
+<div style="width: 1000px; text-align: center; margin: auto; padding-top: 50px;">
+  <h2>Shop by Category</h2>
+</div>
+
 <!-- Cards -->
 <div class="cards">
 
@@ -111,5 +115,53 @@
     </div>
   </div>
 </div>
+
+<!-- All Items -->
+<div style="width: 1000px; text-align: center; margin: auto; padding-top: 50px;">
+  <h2>Browse all of our products!</h2>
+</div>
+
+<div class="shopItems">
+  <% itemList.forEach(function(item) { %>
+  <a class="shopItemLinks" href="/item/<%= item.id %>">
+    <div class="shopItem">
+      <div class="itemTitle">
+        <p><%= item.name %></p>
+      </div>
+      <div class="itemImage">
+        <img
+          src="https://kuiperbeltofbabies.s3.us-east-2.amazonaws.com/item-images/<%= item.picture.toString().split(";")[0] %>"
+          alt="picture">
+      </div>
+      <div>
+        <p>$<%= item.price %></p>
+        <hr>
+        <p><b>Seller:</b> Yo mama</p>
+        <p><b>Location:</b> <%= item.city %>, <%= item.state %></p>
+      </div>
+    </div>
+  </a>
+  <% }); %>
+</div>
+
+<nav aria-label="Page navigation example">
+  <ul class="pagination justify-content-center">
+    <li class="page-item">
+      <a class="page-link" href="#" aria-label="Previous">
+        <span aria-hidden="true">&laquo;</span>
+        <span class="sr-only">Previous</span>
+      </a>
+    </li>
+    <li class="page-item active"><a class="page-link" href="#">1</a></li>
+    <li class="page-item"><a class="page-link" href="#">2</a></li>
+    <li class="page-item"><a class="page-link" href="#">3</a></li>
+    <li class="page-item">
+      <a class="page-link" href="#" aria-label="Next">
+        <span aria-hidden="true">&raquo;</span>
+        <span class="sr-only">Next</span>
+      </a>
+    </li>
+  </ul>
+</nav>
 
 <%- include('partials/footer') %>
