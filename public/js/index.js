@@ -21,3 +21,7 @@ function setMainImage(img) {
   $(".tiny-images").attr("class", "tiny-images");
   $(img).attr("class", "tiny-images selected-image");
 }
+
+function removeImage(div) {
+  div.parentNode.remove();
+}
