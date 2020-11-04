@@ -497,6 +497,45 @@ app.post("/databaseAdd", upload.array("itemImages"), function (req, res) {
   });
 });
 
+app.post("/search-results", function (req, res) {
+  var search = req.body.searchText;
+  var category = req.body.category;
+
+  if (category === "All") {
+    category = ""
+  }
+  
+  var itemsToRender = [];
+  var promise = new Promise(function (resolve, reject) {
+    // db.getCollection('items').find({"name":{$regex:".*test.*", $options: "i"}, "itemType":{$regex: ".*Clothing.*"}})
+    Item.find({
+      name:{$regex: ".*" + search + ".*", $options: "i"},
+      itemType:{$regex: ".*" + category + ".*"}
+    }, function (err, items) {
+      if (err) {
+        console.log(err);
+      } else {
+        itemsToRender = items;
+        if (itemsToRender.length !== 0) {
+          resolve();
+        } else {
+          reject();
+        }
+      }
+    });
+  });
+  promise.then(function (result) {
+      res.render("shop", {
+        check: isAuth(req),
+        itemList: itemsToRender,
+        placeholder: search
+      });
+    },
+    function (err) {
+      console.log(err);
+    });
+});
+
 function isAuth(req) {
   var check;
   if (req.isAuthenticated()) {

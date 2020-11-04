@@ -18,7 +18,9 @@
 
 <!-- Display items for mf shopping -->
 <div class="shopItems">
+  <% try { %>
   <h3><%= itemType %></h3>
+  <% } catch {} %>
   <% itemList.forEach(function(item) { %>
   <a class="shopItemLinks" href="/item/<%= item.id %>">
     <div class="shopItem">
