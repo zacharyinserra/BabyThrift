@@ -413,6 +413,12 @@ app.get("/edit-item/:itemID", function (req, res) {
     });
 });
 
+app.get("/account-settings", function (req, res) {
+  res.render("account-settings", {
+    check: isAuth(req)
+  });
+});
+
 app.post("/register", function (req, res) {
   User.register({
     username: req.body.username

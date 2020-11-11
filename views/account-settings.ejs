@@ -1,0 +1,28 @@
+<%- include('partials/header') %>
+<!-- Register/Login/Cart -->
+<div class="register">
+    <% if (check) { %>
+    <a class="btn btn-light btn-med" href="/account" role="button">Account</a>
+    <a class="btn btn-dark btn-med" href="/logout" role="button">Logout</button>
+        <% } else { %>
+        <a class="btn btn-light btn-med" href="/register" role="button">Register</a>
+        <button class="btn btn-dark btn-med" onclick="openLogin()">Login</button>
+        <% } %>
+
+        <a class="btn btn-light btn-med" href="#" role="button">CART</a>
+</div>
+</div>
+
+
+<div class="setting-blocks">
+    Addresses
+</div>
+<div class="setting-blocks">
+    Payment Methods
+</div>
+<div class="setting-blocks">
+    Notification Preferences
+</div>
+
+
+<%- include('partials/footer') %>
