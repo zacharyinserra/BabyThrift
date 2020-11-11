@@ -25,3 +25,9 @@ function setMainImage(img) {
 function removeImage(div) {
   div.parentNode.remove();
 }
+
+// function enablePopover(btn) {
+//   $('[data-toggle="popover"]').popover({
+//     container: "body"
+//   });
+// }

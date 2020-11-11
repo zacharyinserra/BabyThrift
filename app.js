@@ -180,7 +180,7 @@ app.get("/", function (req, res) {
   var itemsToRender = [];
   var promise = new Promise(function (resolve, reject) {
     Item.find({
-  
+
     }, function (err, items) {
       if (err) {
         console.log(err);
@@ -250,17 +250,25 @@ app.get("/account", function (req, res) {
     });
   });
   promise.then(function (result) {
-      res.render("account", {
-        check: isAuth(req),
-        itemList: itemsToRender
-      });
+      if (isAuth(req)) {
+        res.render("account", {
+          check: true,
+          itemList: itemsToRender
+        });
+      } else {
+        res.render("login");
+      }
     },
     function (err) {
       console.log(err);
-      res.render("account", {
-        check: isAuth(req),
-        itemList: itemsToRender
-      });
+      if (isAuth(req)) {
+        res.render("account", {
+          check: true,
+          itemList: itemsToRender
+        });
+      } else {
+        res.render("login");
+      }
     });
 });
 
@@ -354,6 +362,57 @@ app.get("/item/:itemID", function (req, res) {
     });
 });
 
+app.get("/edit-item/:itemID", function (req, res) {
+  var name;
+  var desc;
+  var manufacturer;
+  var price;
+  var city;
+  var state;
+  var pics;
+
+  var promise = new Promise(function (resolve, reject) {
+    Item.findOne({
+      _id: req.params.itemID
+    }, function (err, item) {
+      name = item.name;
+      desc = item.description;
+      manufacturer = item.manufacturer;
+      price = item.price;
+      city = item.city;
+      state = item.state;
+      pics = item.picture;
+      if (err) {
+        console.log(err);
+      } else {
+        if (item) {
+          resolve();
+        } else {
+          reject();
+        }
+      }
+    });
+  });
+
+  promise.then(function (result) {
+      pics = pics.split(";");
+      res.render("edit-item", {
+        check: isAuth(req),
+        itemID: req.params.itemID,
+        itemName: name,
+        itemDesc: desc,
+        itemManu: manufacturer,
+        itemPrice: price,
+        itemCity: city,
+        itemState: state,
+        itemPics: pics
+      });
+    },
+    function (err) {
+      console.log(err);
+    });
+});
+
 app.post("/register", function (req, res) {
   User.register({
     username: req.body.username
@@ -389,7 +448,7 @@ app.post("/login", function (req, res) {
   });
 });
 
-app.post("/databaseAdd", upload.array("itemImages"), function (req, res) {
+app.post("/database-add", upload.array("itemImages"), function (req, res) {
 
   if (userID === "") {
     res.write("<h1>Sign in bitch<h1>");
@@ -504,13 +563,18 @@ app.post("/search-results", function (req, res) {
   if (category === "All") {
     category = ""
   }
-  
+
   var itemsToRender = [];
   var promise = new Promise(function (resolve, reject) {
     // db.getCollection('items').find({"name":{$regex:".*test.*", $options: "i"}, "itemType":{$regex: ".*Clothing.*"}})
     Item.find({
-      name:{$regex: ".*" + search + ".*", $options: "i"},
-      itemType:{$regex: ".*" + category + ".*"}
+      name: {
+        $regex: ".*" + search + ".*",
+        $options: "i"
+      },
+      itemType: {
+        $regex: ".*" + category + ".*"
+      }
     }, function (err, items) {
       if (err) {
         console.log(err);
@@ -533,6 +597,83 @@ app.post("/search-results", function (req, res) {
     },
     function (err) {
       console.log(err);
+    });
+});
+
+app.post("/edit-item/delete-item", function (req, res) {
+
+  var id = req.body.itemID;
+  var name;
+  var desc;
+  var manufacturer;
+  var price;
+  var city;
+  var state;
+  var pics;
+
+  var promise = new Promise(function (resolve, reject) {
+    Item.findOne({
+      _id: id
+    }, function (err, item) {
+      name = item.name;
+      desc = item.description;
+      manufacturer = item.manufacturer;
+      price = item.price;
+      city = item.city;
+      state = item.state;
+      pics = item.picture;
+      if (err) {
+        console.log(err);
+      } else {
+        if (item) {
+          resolve();
+        } else {
+          reject();
+        }
+      }
+    });
+  });
+
+  promise.then(function (result) {
+      console.log("Item found.");
+      console.log(result);
+    },
+    function (err) {
+      console.log(err);
+    });
+
+  console.log("Begin delete.");
+  var promise = new Promise(function (resolve, reject) {
+    Item.deleteOne({
+      _id: id
+    }, function (err) {
+      if (err) {
+        console.log(err);
+        reject();
+      } else {
+        resolve();
+      }
+    });
+  });
+
+  promise.then(function (result) {
+      pics = pics.split(";");
+      console.log(result);
+      res.render("delete-success", {
+        check: isAuth(req),
+        itemID: id,
+        itemName: name,
+        itemDesc: desc,
+        itemManu: manufacturer,
+        itemPrice: price,
+        itemCity: city,
+        itemState: state,
+        itemPics: pics
+      });
+    },
+    function (err) {
+      console.log(err);
+      res.render("delete-error");
     });
 });
 

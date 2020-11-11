@@ -324,11 +324,17 @@ input[type="file"] {
   text-decoration: none;
 }
 
-/* .recent {
-  display: flex;
-  width: 1200px;
-  margin: auto;
-} */
+.item-title {
+  display: block;
+}
+
+.item-title p {
+  display: inline-block;
+}
+
+.item-title .settings {
+  float: right;
+}
 
 .recent-orders {
   width: 1000px;
