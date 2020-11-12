@@ -420,6 +420,12 @@ input[type="file"] {
   margin: auto;
 }
 
+.address-form {
+  display: none;
+  width: 800px;
+  margin: auto;
+}
+
 /* footer */
 
 footer {

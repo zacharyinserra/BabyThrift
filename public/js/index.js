@@ -26,8 +26,11 @@ function removeImage(div) {
   div.parentNode.remove();
 }
 
-// function enablePopover(btn) {
-//   $('[data-toggle="popover"]').popover({
-//     container: "body"
-//   });
-// }
+function toggleAddAddress() {
+  var display = $(".address-form").css("display");
+  if (display === "none") {
+    $(".address-form").show();
+  } else {
+    $(".address-form").hide();
+  }
+}
