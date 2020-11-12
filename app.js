@@ -120,6 +120,41 @@ const itemSchema = new mongoose.Schema({
 const Item = new mongoose.model("Item", itemSchema);
 
 
+// Address Schema
+
+const addressSchema = new mongoose.Schema({
+  userID: {
+    type: String,
+    required: true
+  },
+  fullname: {
+    type: String,
+    required: true
+  },
+  address1: {
+    type: String,
+    required: true
+  },
+  address2: {
+    type: String
+  },
+  city: {
+    type: String,
+    required: true
+  },
+  state: {
+    type: String,
+    required: true
+  },
+  zip: {
+    type: Number,
+    required: true
+  }
+});
+
+const Address = new mongoose.model("Address", addressSchema);
+
+
 // AWS S3
 
 const bucketName = process.env.BUCKETNAME;
@@ -414,8 +449,46 @@ app.get("/edit-item/:itemID", function (req, res) {
 });
 
 app.get("/account-settings", function (req, res) {
-  res.render("account-settings", {
-    check: isAuth(req)
+
+  var addressesToRender = [];
+
+  var promise = new Promise(function (resolve, reject) {
+    Address.find({
+      userID: userID
+    }, function (err, addresses) {
+      if (err) {
+        console.log(err);
+      } else {
+        addressesToRender = addresses;
+        if (addressesToRender.length !== 0) {
+          resolve();
+        } else {
+          reject();
+        }
+      }
+    });
+  });
+
+  promise.then(function (result) {
+    if (isAuth(req)) {
+      res.render("account-settings", {
+        check: true,
+        addressList: addressesToRender
+      });
+    } else {
+      res.render("login");
+    }
+  },
+  function (err) {
+    console.log(err);
+    if (isAuth(req)) {
+      res.render("account-settings", {
+        check: true,
+        addressList: addressesToRender
+      });
+    } else {
+      res.render("login");
+    }
   });
 });
 
@@ -681,6 +754,84 @@ app.post("/edit-item/delete-item", function (req, res) {
       console.log(err);
       res.render("delete-error");
     });
+});
+
+app.post("/address-add", function (req, res) {
+
+  if (userID === "") {
+    res.write("<h1>Sign in bitch<h1>");
+  }
+  console.log(req.body);
+  var fullname = req.body.fullname;
+  var address1 = req.body.address1;
+  var address2 = req.body.address2;
+  var city = req.body.city;
+  var state = req.body.state;
+  var zipcode = req.body.zipcode;
+
+  var address = new Address({
+    userID: userID,
+    fullname: fullname,
+    address1: address1,
+    address2: address2,
+    city: city,
+    state: state,
+    zip: zipcode
+  });
+
+  address.save(function (err, doc) {
+    if (err) {
+      console.log(err);
+      res.render("upload-error", {
+        check: true,
+        error: err
+      });
+    } else {
+      console.log("Address added succesfully");
+      // console.log(doc);
+
+      var addressesToRender = [];
+
+      var promise = new Promise(function (resolve, reject) {
+        Address.find({
+          userID: userID
+        }, function (err, addresses) {
+          if (err) {
+            console.log(err);
+          } else {
+            addressesToRender = addresses;
+            if (addressesToRender.length !== 0) {
+              resolve();
+            } else {
+              reject();
+            }
+          }
+        });
+      });
+
+      promise.then(function (result) {
+        if (isAuth(req)) {
+          res.render("account-settings", {
+            check: true,
+            addressList: addressesToRender
+          });
+        } else {
+          res.render("login");
+        }
+      },
+      function (err) {
+        console.log(err);
+        if (isAuth(req)) {
+          res.render("account-settings", {
+            check: true,
+            addressList: addressesToRender
+          });
+        } else {
+          res.render("login");
+        }
+      });
+    }
+  });
 });
 
 function isAuth(req) {
