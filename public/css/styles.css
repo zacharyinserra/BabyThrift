@@ -216,7 +216,11 @@ input[type=password] {
   background-size: cover;
 }
 
-.shopItems {
+.shop-filter {
+  width: 1000px;
+}
+
+.shop-items {
   width: 1200px;
   margin: auto;
   padding-top: 16px;
@@ -224,20 +228,34 @@ input[type=password] {
   text-align: center;
 }
 
-.shopItem {
+.shop-item {
   width: 290px;
   display: inline-block;
   border-style: solid;
   padding: 8px;
   text-align: left;
+  position: relative;
 }
 
-.shopItem p {
+.shop-item:hover .shop-item-overlay {
+  display: block;
+}
+
+.shop-item p {
   margin: 0;
 }
 
-.shopItemLinks:hover {
+.shop-item-links:hover {
   text-decoration: none;
+}
+
+.shop-item-overlay {
+  position: absolute;
+  top: 35%;
+  left: 50%;
+  transform: translate(-50%, -50%);
+  -ms-transform: translate(-50%, -50%);
+  display: none;
 }
 
 .itemImage img {

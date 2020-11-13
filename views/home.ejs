@@ -121,10 +121,10 @@
   <h2>Browse all of our products!</h2>
 </div>
 
-<div class="shopItems">
+<div class="shop-items">
   <% itemList.forEach(function(item) { %>
-  <a class="shopItemLinks" href="/item/<%= item.id %>">
-    <div class="shopItem">
+  <a class="shop-item-links" href="/item/<%= item.id %>">
+    <div class="shop-item">
       <div class="itemTitle">
         <p><%= item.name %></p>
       </div>
@@ -138,6 +138,9 @@
         <hr>
         <p><b>Seller:</b> Yo mama</p>
         <p><b>Location:</b> <%= item.city %>, <%= item.state %></p>
+      </div>
+      <div class="shop-item-overlay">
+        <button>View Details</button>
       </div>
     </div>
   </a>
