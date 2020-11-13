@@ -7,8 +7,8 @@
 }
 
 .welcome {
-  width: 250px;
-  float: left;
+  /* width: 200px; */
+  display: inline-flex;
   text-align: left;
 }
 
@@ -19,14 +19,37 @@
 }
 
 .register {
-  width: 310px;
-  float: right;
-  text-align: right;
+  /* width: 310px; */
+  display: inline-flex;
 }
 
-.cart {
-  width: 49%;
-  height: 50%;
+.btn-hamburger {
+  padding: 0 2px;
+}
+
+.btn-bb {
+  padding: 0 2px;
+  width: 107px;
+}
+
+.btn-register {
+  padding: 0 2px;
+}
+
+.btn-login {
+  padding: 0 2px;
+}
+
+.btn-account {
+  padding: 0 2px;
+}
+
+.btn-cart {
+  padding: 0 2px;
+}
+
+.btn-logout {
+  padding: 0 2px;
 }
 
 /* Side Menu */
