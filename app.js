@@ -398,8 +398,14 @@ app.get("/item/:itemID", function (req, res) {
 });
 
 app.get("/edit-item/:itemID", function (req, res) {
+
+  // if (!(isAuth(req)) || userID === "") {
+  //   res.redirect(req.baseUrl + "login");
+  // }
+
   var name;
   var desc;
+  var type;
   var manufacturer;
   var price;
   var city;
@@ -412,7 +418,8 @@ app.get("/edit-item/:itemID", function (req, res) {
     }, function (err, item) {
       name = item.name;
       desc = item.description;
-      manufacturer = item.manufacturer;
+      type = item.itemType,
+        manufacturer = item.manufacturer;
       price = item.price;
       city = item.city;
       state = item.state;
@@ -436,6 +443,7 @@ app.get("/edit-item/:itemID", function (req, res) {
         itemID: req.params.itemID,
         itemName: name,
         itemDesc: desc,
+        itemType: type,
         itemManu: manufacturer,
         itemPrice: price,
         itemCity: city,
@@ -470,30 +478,71 @@ app.get("/account-settings", function (req, res) {
   });
 
   promise.then(function (result) {
-    if (isAuth(req)) {
-      res.render("account-settings", {
-        check: true,
-        addressList: addressesToRender
-      });
-    } else {
-      res.render("login");
-    }
-  },
-  function (err) {
-    console.log(err);
-    if (isAuth(req)) {
-      res.render("account-settings", {
-        check: true,
-        addressList: addressesToRender
-      });
-    } else {
-      res.render("login");
-    }
-  });
+      if (isAuth(req)) {
+        res.render("account-settings", {
+          check: true,
+          addressList: addressesToRender
+        });
+      } else {
+        res.render("login");
+      }
+    },
+    function (err) {
+      console.log(err);
+      if (isAuth(req)) {
+        res.render("account-settings", {
+          check: true,
+          addressList: addressesToRender
+        });
+      } else {
+        res.render("login");
+      }
+    });
 });
 
 app.get("/login", function (req, res) {
   res.render("login");
+});
+
+app.get("/user-items", function (req, res) {
+  var itemsToRender = [];
+  var promise = new Promise(function (resolve, reject) {
+    Item.find({
+      userID: userID
+    }, function (err, items) {
+      if (err) {
+        console.log(err);
+      } else {
+        itemsToRender = items;
+        if (itemsToRender.length !== 0) {
+          resolve();
+        } else {
+          reject();
+        }
+      }
+    });
+  });
+  promise.then(function (result) {
+      if (isAuth(req)) {
+        res.render("user-items", {
+          check: true,
+          itemList: itemsToRender
+        });
+      } else {
+        res.render("login");
+      }
+    },
+    function (err) {
+      console.log(err);
+      if (isAuth(req)) {
+        res.render("user-items", {
+          check: true,
+          itemList: itemsToRender
+        });
+      } else {
+        res.render("login");
+      }
+    });
 });
 
 app.post("/register", function (req, res) {
@@ -533,8 +582,8 @@ app.post("/login", function (req, res) {
 
 app.post("/database-add", upload.array("itemImages"), function (req, res) {
 
-  if (userID === "") {
-    res.write("<h1>Sign in bitch<h1>");
+  if (!(isAuth(req))) {
+    res.redirect("login");
   }
 
   var name = req.body.nameOfItem;
@@ -637,6 +686,64 @@ app.post("/database-add", upload.array("itemImages"), function (req, res) {
       }
     });
   });
+});
+
+app.post("/edit-item/database-edit", function (req, res) {
+  console.log("Begin edit");
+  var id = req.body.itemID;
+  var name = req.body.nameOfItem;
+  var desc = req.body.descriptionOfItem;
+  var type = req.body.typeOfItem;
+  var manufacturer = req.body.manufacturerOfItem;
+  var price = req.body.priceOfItem;
+  var city = req.body.cityOfItem;
+  var state = req.body.stateOfItem;
+
+  var filter = {
+    _id: id
+  };
+  var update = {
+    $set: {
+      name: name,
+      description: desc,
+      itemType: type,
+      manufacturer: manufacturer,
+      price: price,
+      city: city,
+      state: state
+      // Also pics eventually
+    },
+  };
+
+  var promise = new Promise(function (resolve, reject) {
+    Item.updateOne(filter, update, function (err, res) {
+      if (err) {
+        console.log(err);
+        reject();
+      } else {
+        resolve();
+      }
+    });
+  });
+  promise.then(function (result) {
+      if (isAuth(req)) {
+        res.render("edit-success", {
+          check: true
+        });
+      } else {
+        res.render("login");
+      }
+    },
+    function (err) {
+      console.log(err);
+      if (isAuth(req)) {
+        res.render("edit-error", {
+          check: true
+        });
+      } else {
+        res.render("login");
+      }
+    });
 });
 
 app.post("/search-results", function (req, res) {
@@ -762,8 +869,8 @@ app.post("/edit-item/delete-item", function (req, res) {
 
 app.post("/address-add", function (req, res) {
 
-  if (userID === "") {
-    res.write("<h1>Sign in bitch<h1>");
+  if (!(isAuth(req))) {
+    res.render("login");
   }
   console.log(req.body);
   var fullname = req.body.fullname;
@@ -814,28 +921,58 @@ app.post("/address-add", function (req, res) {
       });
 
       promise.then(function (result) {
-        if (isAuth(req)) {
-          res.render("account-settings", {
-            check: true,
-            addressList: addressesToRender
-          });
-        } else {
-          res.render("login");
-        }
-      },
-      function (err) {
-        console.log(err);
-        if (isAuth(req)) {
-          res.render("account-settings", {
-            check: true,
-            addressList: addressesToRender
-          });
-        } else {
-          res.render("login");
-        }
-      });
+          if (isAuth(req)) {
+            res.render("account-settings", {
+              check: true,
+              addressList: addressesToRender
+            });
+          } else {
+            res.render("login");
+          }
+        },
+        function (err) {
+          console.log(err);
+          if (isAuth(req)) {
+            res.render("account-settings", {
+              check: true,
+              addressList: addressesToRender
+            });
+          } else {
+            res.render("login");
+          }
+        });
     }
   });
+});
+
+app.post("/delete-address", function (req, res) {
+
+  if (!(isAuth(req))) {
+    res.redirect("login");
+  }
+
+  var id = req.body.addressID;
+
+  var promise = new Promise(function (resolve, reject) {
+    Address.deleteOne({
+      _id: id
+    }, function (err) {
+      if (err) {
+        console.log(err);
+        reject();
+      } else {
+        resolve();
+      }
+    });
+  });
+
+  promise.then(function (result) {
+      res.redirect("account-settings");
+    },
+    function (err) {
+      console.log(err);
+      res.render("delete-error");
+    });
 });
 
 function isAuth(req) {

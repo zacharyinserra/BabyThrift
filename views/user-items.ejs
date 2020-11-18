@@ -1,0 +1,29 @@
+<%- include('partials/header') %>
+
+
+<div class="shop-items">
+    <% itemList.forEach(function(item) { %>
+    <div class="shop-item">
+        <div class="item-title">
+            <p><%= item.name %></p>
+            <a class="btn-edit-user-item" href="/edit-item/<%= item.id %>">cog.png</a>
+        </div>
+        <div class="itemImage">
+            <img src="https://kuiperbeltofbabies.s3.us-east-2.amazonaws.com/item-images/<%= item.picture.toString().split(";")[0] %>"
+                alt="picture">
+        </div>
+        <div>
+            <p>$<%= item.price %></p>
+            <hr>
+            <p><b>Seller:</b> Yo mama</p>
+            <p><b>Location:</b> <%= item.city %>, <%= item.state %></p>
+        </div>
+        <div class="shop-item-overlay">
+            <a class="btn btn-dark btn-med shop-item-links" href="/item/<%= item.id %>">View Details</a>
+        </div>
+    </div>
+    <% }); %>
+</div>
+
+
+<%- include('partials/footer') %>

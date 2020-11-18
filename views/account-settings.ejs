@@ -3,11 +3,26 @@
 <div class="setting-blocks">
     <h1>Your Addresses</h1>
 
-    <% addressList.forEach(function(addy) { %>
-        <h6><b><%= addy.fullname %></b></h6>
-        <h6><%= addy.address1 %> <%=addy.address2 %></h6>
-        <h6><%= addy.city %>  <%= addy.state %>, <%= addy.zip %></h6>
-    <% }); %>
+    <div class="addresses">
+        <% addressList.forEach(function(addy) { %>
+        <div class="outer-addy">
+            <div class="inner-addy">
+                <form action="delete-address" method="POST">
+                    <div>
+                        <input name="addressID" style="display:none;" value="<%= addy._id %>">
+                        <h6><b><%= addy.fullname %></b></h6>
+                        <h6><%= addy.address1 %> <%=addy.address2 %></h6>
+                        <h6><%= addy.city %> <%= addy.state %>, <%= addy.zip %></h6>
+                    </div>
+                    <div>
+                        <a class="btn btn-light btn-sm">Edit</a>
+                        <button type="submit" class="btn btn-dark btn-sm">Remove</button>
+                    </div>
+                </form>
+            </div>
+        </div>
+        <% }); %>
+    </div>
 
     <button onclick="toggleAddAddress()">Add new address</button>
     <form class="address-form" method="POST" action="address-add">
@@ -15,9 +30,11 @@
             <label for="fullname">Full Name:</label>
             <input name="fullname" type="text" class="form-control" id="fullname" required>
             <label for="address1">Address Line 1:</label>
-            <input name="address1" type="text" class="form-control" id="address1" placeholder="Street address, PO Box, Company name" required>
+            <input name="address1" type="text" class="form-control" id="address1"
+                placeholder="Street address, PO Box, Company name" required>
             <label for="address2">Address Line 2:</label>
-            <input name="address2" type="text" class="form-control" id="address2" placeholder="Apartment, suite, unit, building, etc.">
+            <input name="address2" type="text" class="form-control" id="address2"
+                placeholder="Apartment, suite, unit, building, etc.">
             <label for="city">City:</label>
             <input name="city" type="text" class="form-control" id="city" required>
             <label for="state">State:</label>

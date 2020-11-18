@@ -11,7 +11,7 @@
     <a class="account-item orders" href="/pending-orders">
         <h2 class="account-link">Your orders</h2>
     </a>
-    <a class="account-item items" href="/items-for-sale">
+    <a class="account-item items" href="/user-items">
         <h2 class="account-link">Your listed items</h2>
     </a>
     <a class="account-item settings" href="/account-settings">
@@ -36,7 +36,7 @@
                     <a href="/item/<%= itemList[i].id %>">
                         <p><%= itemList[i].name %></p>
                     </a>
-                    <a class="settings" href="/edit-item/<%= itemList[i].id %>">cong.png</a>
+                    <a class="settings" href="/edit-item/<%= itemList[i].id %>">cog.png</a>
                     <!-- button onclick="enablePopover(this)" data-placement="bottom" type="button" data-toggle="popover" data-html="true" data-original-title="Edit" data-content="Edit">cog.png</button> -->
                 </div>
                 <a class="itemImage" href="/item/<%= itemList[i].id %>">
@@ -53,7 +53,7 @@
         </div>
         <% } %>
     </div>
-    <button class="expand-button">View all of your items</button>
+    <a href="/user-items" class="expand-button">View all of your items</a>
 </div>
 <!-- </div> -->
 

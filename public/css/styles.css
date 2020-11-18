@@ -289,6 +289,7 @@ input[type=password] {
 }
 
 /* Item Upload Page */
+
 .itemDetails {
   width: 75%;
   margin: auto;
@@ -337,6 +338,13 @@ input[type="file"] {
   top: 10px;
   right: 10px;
   position: absolute;
+}
+
+/* user-items */
+
+.btn-edit-user-item {
+  float: right;
+  z-index: 1;
 }
 
 /* Account page */
@@ -462,9 +470,31 @@ input[type="file"] {
   margin: auto;
 }
 
+.addresses { 
+  display: inline-flex;
+  width: 100%;
+}
+
+.outer-addy {
+  width: 32%;
+  padding: 8px;
+}
+
+.inner-addy {
+  border: solid;
+  padding: 8px;
+}
+
 .address-form {
   display: none;
   width: 800px;
+  margin: auto;
+}
+
+/* edit-item */
+
+.edit-form {
+  width: 1000px;
   margin: auto;
 }
 
