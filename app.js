@@ -42,6 +42,7 @@ app.use(passport.session());
 // Constants
 var userID = "";
 var isGoogleAuth = null;
+var gPageLimit = 4;
 
 
 // multer
@@ -324,7 +325,7 @@ app.get("/shop/:itemType", function (req, res) {
       itemType: req.params.itemType
     }, function (err, items) {
       if (err) {
-        console.log(err);
+        console.log("Error: /shop/:itemType - " + err);
       } else {
         itemsToRender = items;
         if (itemsToRender.length !== 0) {
@@ -333,17 +334,19 @@ app.get("/shop/:itemType", function (req, res) {
           reject();
         }
       }
-    });
+    }).limit(4);
   });
   promise.then(function (result) {
       res.render("shop", {
         check: isAuth(req),
         itemType: req.params.itemType,
-        itemList: itemsToRender
+        itemList: itemsToRender,
+        pageNum: 1,
+        pageLimit: gPageLimit
       });
     },
     function (err) {
-      console.log(err);
+      console.log("Error (promise): /shop/:itemType - " + err);
     });
 });
 
@@ -754,6 +757,31 @@ app.post("/search-results", function (req, res) {
     category = ""
   }
 
+  var limit = parseInt(req.body.pageLimit);
+  var page = parseInt(req.body.pageNumber);
+  var next = req.body.next;
+  var previous = req.body.previous;
+
+  if (limit == null || isNaN(limit)) {
+    limit = gPageLimit;
+  }
+  if (page == null || isNaN(page)) {
+    page = 0;
+  } else {
+    page = page - 1;
+  }
+
+  if (next === "") {
+    page = page + 1;
+  }
+  if (previous === "") {
+    if (page >= 1) {
+      page = page - 1;
+    }
+  }
+
+  var skip = page * limit;
+
   var itemsToRender = [];
   var promise = new Promise(function (resolve, reject) {
     // db.getCollection('items').find({"name":{$regex:".*test.*", $options: "i"}, "itemType":{$regex: ".*Clothing.*"}})
@@ -767,7 +795,7 @@ app.post("/search-results", function (req, res) {
       }
     }, function (err, items) {
       if (err) {
-        console.log(err);
+        console.log("Error: /search-results - " + err);
       } else {
         itemsToRender = items;
         if (itemsToRender.length !== 0) {
@@ -776,17 +804,21 @@ app.post("/search-results", function (req, res) {
           reject();
         }
       }
-    });
+    }).limit(limit).skip(skip);
   });
   promise.then(function (result) {
       res.render("shop", {
         check: isAuth(req),
         itemList: itemsToRender,
-        placeholder: search
+        itemType: "search-results",
+        pageNum: page + 1,
+        pageLimit: limit,
+        placeholder: search,
+        category: category
       });
     },
     function (err) {
-      console.log(err);
+      console.log("Error (promise): /search-results - " + err);
     });
 });
 
@@ -972,6 +1004,64 @@ app.post("/delete-address", function (req, res) {
     function (err) {
       console.log(err);
       res.render("delete-error");
+    });
+});
+
+app.post("/shop/:itemType", function (req, res) {
+
+  var limit = parseInt(req.body.pageLimit);
+  var page = parseInt(req.body.pageNumber);
+  var next = req.body.next;
+  var previous = req.body.previous;
+
+  if (limit == null || isNaN(limit)) {
+    limit = gPageLimit;
+  }
+  if (page == null || isNaN(page)) {
+    page = 0;
+  } else {
+    page = page - 1;
+  }
+
+  if (next === "") {
+    page = page + 1;
+  }
+  if (previous === "") {
+    if (page > 1) {
+      page = page - 1;
+    }
+  }
+
+  var skip = page * limit;
+
+  var itemsToRender = [];
+  var promise = new Promise(function (resolve, reject) {
+    Item.find({
+      itemType: req.params.itemType
+    }, function (err, items) {
+      if (err) {
+        console.log("Error: /shop/:itemType - " + err);
+      } else {
+        itemsToRender = items;
+        if (itemsToRender.length !== 0) {
+          resolve();
+        } else {
+          reject();
+        }
+      }
+    }).limit(limit).skip(skip);
+  });
+  promise.then(function (result) {
+      res.render("shop", {
+        check: isAuth(req),
+        itemType: req.params.itemType,
+        itemList: itemsToRender,
+        pageNum: page + 1,
+        pageLimit: limit
+      });
+    },
+    function (err) {
+      console.log("Error (promise): /shop/:itemType - " + err);
     });
 });
 

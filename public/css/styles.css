@@ -288,6 +288,14 @@ input[type=password] {
   object-fit: contain;
 }
 
+/* Paginator */
+
+.paginator {
+  width: 750px;
+  margin: auto;
+  display: flex;
+}
+
 /* Item Upload Page */
 
 .itemDetails {
