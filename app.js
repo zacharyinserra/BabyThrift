@@ -242,7 +242,9 @@ app.get("/", function (req, res) {
 });
 
 app.get("/register", function (req, res) {
-  res.render("register");
+  res.render("register", {
+    check: false
+  });
 });
 
 app.get("/auth/google",

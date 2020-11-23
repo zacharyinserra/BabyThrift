@@ -506,6 +506,22 @@ input[type="file"] {
   margin: auto;
 }
 
+/* upload-error */
+
+.upload-error-head {
+  width: 1000px;
+  margin: auto;
+  padding: 50px 0;
+  text-align: center;
+}
+
+.upload-error-foot {
+  width: 1000px;
+  margin: auto;
+  padding: 50px 0;
+  text-align: center;
+}
+
 /* footer */
 
 footer {
