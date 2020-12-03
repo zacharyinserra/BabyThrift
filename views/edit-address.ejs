@@ -1,0 +1,26 @@
+<%- include('partials/header') %>
+
+
+<form class="address-form" method="POST" action="address-edit" style="display: block;">
+    <div class="form-group">
+        <input name="addressID" type="text" value="<%= id %>" style="display: none;">
+        <label for="fullname">Full Name:</label>
+        <input name="fullname" type="text" class="form-control" id="fullname" value="<%= fullname %>" required>
+        <label for="address1">Address Line 1:</label>
+        <input name="address1" type="text" class="form-control" id="address1"
+            placeholder="Street address, PO Box, Company name" value="<%= address1 %>" required>
+        <label for="address2">Address Line 2:</label>
+        <input name="address2" type="text" class="form-control" id="address2"
+            placeholder="Apartment, suite, unit, building, etc." value="<%= address2 %>">
+        <label for="city">City:</label>
+        <input name="city" type="text" class="form-control" id="city" value="<%= city %>" required>
+        <label for="state">State:</label>
+        <input name="state" type="text" class="form-control" id="state" value="<%= state %>" required>
+        <label for="zipcode">Zip Code:</label>
+        <input name="zipcode" type="text" class="form-control" id="zipcode" value="<%= zip %>" required>
+    </div>
+    <button type="submit" id="update-address" class="btn btn-primary btn-lg btn-block">Update Address</button>
+</form>
+
+
+<%- include('partials/footer') %>

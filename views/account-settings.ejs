@@ -1,5 +1,6 @@
 <%- include('partials/header') %>
 
+
 <div class="setting-blocks">
     <h1>Your Addresses</h1>
 
@@ -15,7 +16,7 @@
                         <h6><%= addy.city %> <%= addy.state %>, <%= addy.zip %></h6>
                     </div>
                     <div>
-                        <a class="btn btn-light btn-sm">Edit</a>
+                        <a class="btn btn-light btn-sm" href="/edit-address/<%= addy._id %>">Edit</a>
                         <button type="submit" class="btn btn-dark btn-sm">Remove</button>
                     </div>
                 </form>

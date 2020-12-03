@@ -550,6 +550,80 @@ app.get("/user-items", function (req, res) {
     });
 });
 
+app.get("/edit-address/:addressID", function (req, res) {
+  console.log(req.params.addressID);
+  var id = req.params.addressID;
+  var userID;
+  var fullname;
+  var address1;
+  var address2;
+  var city;
+  var state;
+  var zip;
+
+  var promise = new Promise(function (resolve, reject) {
+    Address.findOne({
+        _id: id
+      },
+      function (err, address) {
+        userID = address.userID;
+        fullname = address.fullname;
+        address1 = address.address1;
+        address2 = address.address2;
+        city = address.city;
+        state = address.state;
+        zip = address.zip;
+        if (err) {
+          console.log("Error: /edit-address/:addressID - " + err);
+        } else {
+          if (address) {
+            console.log("Address found.");
+            resolve();
+          } else {
+            console.log("No address found.");
+            reject();
+          }
+        }
+      });
+  });
+
+  promise.then(function (result) {
+      if (isAuth(req)) {
+        res.render("edit-address", {
+          check: true,
+          id: id,
+          userID: userID,
+          fullname: fullname,
+          address1: address1,
+          address2: address2,
+          city: city,
+          state: state,
+          zip: zip
+        });
+      } else {
+        res.render("login");
+      }
+    },
+    function (err) {
+      console.log("Error (promise): /edit-address/:addressID - " + err);
+      if (isAuth(req)) {
+        res.render("edit-address", {
+          check: true,
+          id: id,
+          userID: userID,
+          fullname: fullname,
+          address1: address1,
+          address2: address2,
+          city: city,
+          state: state,
+          zip: zip
+        });
+      } else {
+        res.render("login");
+      }
+    });
+});
+
 app.post("/register", function (req, res) {
   User.register({
     username: req.body.username
@@ -722,6 +796,61 @@ app.post("/edit-item/database-edit", function (req, res) {
 
   var promise = new Promise(function (resolve, reject) {
     Item.updateOne(filter, update, function (err, res) {
+      if (err) {
+        console.log(err);
+        reject();
+      } else {
+        resolve();
+      }
+    });
+  });
+  promise.then(function (result) {
+      if (isAuth(req)) {
+        res.render("edit-success", {
+          check: true
+        });
+      } else {
+        res.render("login");
+      }
+    },
+    function (err) {
+      console.log(err);
+      if (isAuth(req)) {
+        res.render("edit-error", {
+          check: true
+        });
+      } else {
+        res.render("login");
+      }
+    });
+});
+
+app.post("/edit-address/address-edit", function (req, res) {
+  console.log("Begin address edit");
+  var id = req.body.addressID;
+  var fullname = req.body.fullname;
+  var address1 = req.body.address1;
+  var address2 = req.body.address2;
+  var city = req.body.city;
+  var state = req.body.state;
+  var zip = req.body.zipcode;
+
+  var filter = {
+    _id: id
+  };
+  var update = {
+    $set: {
+      fullname: fullname,
+      address1: address1,
+      address2: address2,
+      city: city,
+      state: state,
+      zip: zip
+    },
+  };
+
+  var promise = new Promise(function (resolve, reject) {
+    Address.updateOne(filter, update, function (err, res) {
       if (err) {
         console.log(err);
         reject();
