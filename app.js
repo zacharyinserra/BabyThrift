@@ -551,7 +551,6 @@ app.get("/user-items", function (req, res) {
 });
 
 app.get("/edit-address/:addressID", function (req, res) {
-  console.log(req.params.addressID);
   var id = req.params.addressID;
   var userID;
   var fullname;
@@ -662,7 +661,7 @@ app.post("/login", function (req, res) {
 app.post("/database-add", upload.array("itemImages"), function (req, res) {
 
   if (!(isAuth(req))) {
-    res.redirect("login");
+    res.redirect("/login");
   }
 
   var name = req.body.nameOfItem;
@@ -778,6 +777,7 @@ app.post("/edit-item/database-edit", function (req, res) {
   var city = req.body.cityOfItem;
   var state = req.body.stateOfItem;
 
+  // Update item
   var filter = {
     _id: id
   };
@@ -805,23 +805,53 @@ app.post("/edit-item/database-edit", function (req, res) {
     });
   });
   promise.then(function (result) {
-      if (isAuth(req)) {
-        res.render("edit-success", {
-          check: true
-        });
-      } else {
-        res.render("login");
-      }
+      console.log("Item updated.");
     },
     function (err) {
       console.log(err);
-      if (isAuth(req)) {
-        res.render("edit-error", {
-          check: true
-        });
+    });
+
+  // Find and render item
+  var promise = new Promise(function (resolve, reject) {
+    Item.findOne({
+      _id: id
+    }, function (err, item) {
+      name = item.name;
+      desc = item.description;
+      manufacturer = item.manufacturer;
+      price = item.price;
+      city = item.city;
+      state = item.state;
+      pics = item.picture;
+      if (err) {
+        console.log(err);
       } else {
-        res.render("login");
+        if (item) {
+          resolve();
+        } else {
+          reject();
+        }
       }
+    });
+  });
+
+  promise.then(function (result) {
+      pics = pics.split(";");
+      res.render("edit-success", {
+        check: isAuth(req),
+        itemID: id,
+        itemName: name,
+        itemDesc: desc,
+        itemManu: manufacturer,
+        itemPrice: price,
+        itemCity: city,
+        itemState: state,
+        itemPics: pics
+      });
+    },
+    function (err) {
+      console.log(err);
+      res.render("edit-error");
     });
 });
 
@@ -861,9 +891,7 @@ app.post("/edit-address/address-edit", function (req, res) {
   });
   promise.then(function (result) {
       if (isAuth(req)) {
-        res.render("edit-success", {
-          check: true
-        });
+        res.redirect("/account-settings");
       } else {
         res.render("login");
       }
@@ -871,7 +899,7 @@ app.post("/edit-address/address-edit", function (req, res) {
     function (err) {
       console.log(err);
       if (isAuth(req)) {
-        res.render("edit-error", {
+        res.render("error", {
           check: true
         });
       } else {
@@ -1111,7 +1139,7 @@ app.post("/address-add", function (req, res) {
 app.post("/delete-address", function (req, res) {
 
   if (!(isAuth(req))) {
-    res.redirect("login");
+    res.redirect("/login");
   }
 
   var id = req.body.addressID;
@@ -1130,7 +1158,7 @@ app.post("/delete-address", function (req, res) {
   });
 
   promise.then(function (result) {
-      res.redirect("account-settings");
+      res.redirect("/account-settings");
     },
     function (err) {
       console.log(err);

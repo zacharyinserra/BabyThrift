@@ -1,0 +1,36 @@
+<%- include('partials/header') %>
+
+
+<div class="uploaded-item-head">
+  <h1>Item edited successfully!</h1>
+</div>
+
+<div class="item-display">
+  <div class="picture">
+    <img class="displayed-image"
+      src="https://kuiperbeltofbabies.s3.us-east-2.amazonaws.com/item-images/<%= itemPics[0] %>" alt="">
+    <div class="other-pictures">
+      <img onclick="setMainImage(this)" class="tiny-images selected-image"
+        src="https://kuiperbeltofbabies.s3.us-east-2.amazonaws.com/item-images/<%= itemPics[0] %>" alt="">
+      <% for (i = 1; i < itemPics.length; i++) { %>
+      <img onclick="setMainImage(this)" class="tiny-images"
+        src="https://kuiperbeltofbabies.s3.us-east-2.amazonaws.com/item-images/<%= itemPics[i] %>" alt="">
+      <% } %>
+    </div>
+  </div>
+  <div class="information">
+    <h2><%= itemName %></h2>
+    <h6><%= itemManu %></h6>
+    <hr>
+    <h3>$<%= itemPrice %></h3>
+    <hr>
+    <h6><%= itemCity %>, <%=itemState %></h6>
+    <h6><%= itemDesc %></h6>
+  </div>
+</div>
+
+<div class="uploaded-item-foot">
+  <a class="btn btn-light btn-med" href="/item/<%= itemID %>">View Item</a>
+  <a class="btn btn-light btn-med" href="/account">View Account</a>
+  <a class="btn btn-light btn-med" href="/">Return Home</a>
+</div>
