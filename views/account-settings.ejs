@@ -8,7 +8,7 @@
         <% addressList.forEach(function(addy) { %>
         <div class="outer-addy">
             <div class="inner-addy">
-                <form action="delete-address" method="POST">
+                <form action="delete-address" method="POST" onsubmit="return confirm('Are you sure you want to delete this address?');">
                     <div>
                         <input name="addressID" style="display:none;" value="<%= addy._id %>">
                         <h6><b><%= addy.fullname %></b></h6>

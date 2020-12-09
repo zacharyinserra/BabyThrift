@@ -341,6 +341,7 @@ app.get("/shop/:itemType", function (req, res) {
   promise.then(function (result) {
       res.render("shop", {
         check: isAuth(req),
+        placeholder: "",
         itemType: req.params.itemType,
         itemList: itemsToRender,
         pageNum: 1,
@@ -1172,10 +1173,40 @@ app.post("/shop/:itemType", function (req, res) {
   var page = parseInt(req.body.pageNumber);
   var next = req.body.next;
   var previous = req.body.previous;
+  var sortCriteria = req.body.sortCriteria;
+  var sort = {};
+
+  switch (sortCriteria) {
+    case "Featured":
+      //
+      break;
+    case "Price: High to Low":
+      sort = { price: -1};
+      break;
+    case "Price: Low to High":
+      sort = { price: 1};
+      break;
+    case "Closest":
+      // Have to add some way of checking distance
+      break;
+    case "Farthest":
+      //
+      break;
+    case "Condition: High to Low":
+      sort = { condition: -1 };
+      break;
+    case "Condition: Low to High":
+      sort = { condition: 1 };
+      break;
+    default:
+      sort = {};
+      break;
+  }
 
   if (limit == null || isNaN(limit)) {
     limit = gPageLimit;
   }
+
   if (page == null || isNaN(page)) {
     page = 0;
   } else {
@@ -1186,7 +1217,7 @@ app.post("/shop/:itemType", function (req, res) {
     page = page + 1;
   }
   if (previous === "") {
-    if (page > 1) {
+    if (page >= 1) {
       page = page - 1;
     }
   }
@@ -1208,15 +1239,17 @@ app.post("/shop/:itemType", function (req, res) {
           reject();
         }
       }
-    }).limit(limit).skip(skip);
+    }).limit(limit).skip(skip).sort(sort);
   });
   promise.then(function (result) {
       res.render("shop", {
         check: isAuth(req),
+        placeholder: "",
         itemType: req.params.itemType,
         itemList: itemsToRender,
         pageNum: page + 1,
-        pageLimit: limit
+        pageLimit: limit,
+        sortCriteria: sortCriteria
       });
     },
     function (err) {

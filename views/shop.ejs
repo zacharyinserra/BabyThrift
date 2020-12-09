@@ -35,7 +35,7 @@
 
 <form class="paginator" action="<%= itemType %>" method="POST">
   <input type="text" value="<%= placeholder %>" name="searchText" style="display: none;">
-  <input type="text" value="<%= category %>" name="category" style="display: none;">
+  <input type="text" value="<%= itemType %>" name="category" style="display: none;">
   <div class="limitor">
     <select name="pageLimit" id="page-limit" onchange="this.form.submit()">
       <% switch(pageLimit) {
@@ -66,6 +66,27 @@
     <button name="previous">previous</button>
     <input type="number" name="pageNumber" value="<%= pageNum %>">
     <button name="next">next</button>
+  </div>
+  <div class="filter">
+    <select name="sortCriteria" id="sortCriteria" onchange="this.form.submit()">
+      <% 
+      var options = ["Featured", "Price: High to Low", "Price: Low to High", "Closest", "Farthest", "Condition: High to Low", "Condition: Low to High"];
+      for ( var i = 0; i < options.length; i++ )
+      {
+        if (options[i] === sortCriteria) { %>
+          <option selected value="<%= options[i] %>"><%= options[i] %></option>
+        <% } else { %>
+          <option value="<%= options[i] %>"><%= options[i] %></option>
+        <% }
+      } %>
+      <!-- <option value="Featured">Featured</option>
+      <option value="Price: High to Low">Price: High to Low</option>
+      <option value="Price: Low to High">Price: Low to High</option>
+      <option value="Closest">Closest</option>
+      <option value="Farthest">Farthest</option>
+      <option value="Condition: High to Low">Condition: High to Low</option>
+      <option value="Condition: Low to High">Condition: Low to High</option> -->
+    </select>
   </div>
 </form>
 
