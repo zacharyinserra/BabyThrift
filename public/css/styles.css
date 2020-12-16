@@ -1,3 +1,10 @@
+.colurz {
+  background-color: #9EC4C5;
+  background-color: #212529;
+  background-color: #617575;
+  background-color: white;
+}
+
 .header {
   text-align: center;
   background-color: #9EC4C5;
@@ -206,6 +213,8 @@ input[type=password] {
   }
 }
 
+/*  Home */
+
 .carousel {
   width: 80%;
   height: 600px;
@@ -239,6 +248,49 @@ input[type=password] {
   background: transparent no-repeat center;
   background-size: cover;
 }
+
+/* Register */
+
+.reg {
+  width: 1000px;
+  display: block;
+  margin: auto;
+  padding-top: 40px;
+}
+
+.reg-inner {
+  display: flex;
+  padding-top: 50px;
+}
+
+.reg-separator {
+  display: block;
+  width: 80px;
+}
+
+.sign-in-default {
+  width: 60%;
+}
+
+.sign-in-alternates {
+  width: 40%;
+}
+
+.btn-social {
+  border: solid;
+}
+
+.alt-sign-in {
+  width: 70%;
+  margin: auto;
+  padding: 20px 0;
+}
+
+.google-img {
+  height: 50px;
+}
+
+/* Shop */
 
 .shop-filter {
   width: 1000px;
@@ -361,8 +413,8 @@ input[type="file"] {
   width: 80%;
   margin: auto;
   margin-top: 50px;
-  background-color: #9EC4C5; 
-  color: #212529; 
+  background-color: #9EC4C5;
+  color: #212529;
   border-color: #9EC4C5;
 }
 
@@ -496,7 +548,7 @@ input[type="file"] {
   margin: auto;
 }
 
-.addresses { 
+.addresses {
   display: inline-flex;
   width: 100%;
 }

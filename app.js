@@ -345,7 +345,8 @@ app.get("/shop/:itemType", function (req, res) {
         itemType: req.params.itemType,
         itemList: itemsToRender,
         pageNum: 1,
-        pageLimit: gPageLimit
+        pageLimit: gPageLimit,
+        sortCriteria: ""
       });
     },
     function (err) {
