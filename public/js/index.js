@@ -34,3 +34,12 @@ function toggleAddAddress() {
     $(".address-form").hide();
   }
 }
+
+function toggleAddPaymentMethod() {
+  var display = $(".payment-method-form").css("display");
+  if (display === "none") {
+    $(".payment-method-form").show();
+  } else {
+    $(".payment-method-form").hide();
+  }
+}

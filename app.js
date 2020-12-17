@@ -156,6 +156,37 @@ const addressSchema = new mongoose.Schema({
 const Address = new mongoose.model("Address", addressSchema);
 
 
+// Payment Schema
+const paymentSchema = new mongoose.Schema({
+  userID: {
+    type: String,
+    required: true
+  },
+  fullname: {
+    type: String,
+    required: true
+  },
+  cardNumber: {
+    type: String,
+    required: true
+  },
+  expirationDate: {
+    type: String,
+    required: true
+  },
+  cvv: {
+    type: Number,
+    required: true
+  },
+  zip: {
+    type: Number,
+    required: true
+  }
+});
+
+const Payment = new mongoose.model("Payment", paymentSchema);
+
+
 // AWS S3
 
 const bucketName = process.env.BUCKETNAME;
@@ -488,7 +519,8 @@ app.get("/account-settings", function (req, res) {
       if (isAuth(req)) {
         res.render("account-settings", {
           check: true,
-          addressList: addressesToRender
+          addressList: addressesToRender,
+          paymentList:[]
         });
       } else {
         res.render("login");
@@ -499,7 +531,8 @@ app.get("/account-settings", function (req, res) {
       if (isAuth(req)) {
         res.render("account-settings", {
           check: true,
-          addressList: addressesToRender
+          addressList: addressesToRender,
+          paymentList: []
         });
       } else {
         res.render("login");
@@ -1128,7 +1161,8 @@ app.post("/address-add", function (req, res) {
           if (isAuth(req)) {
             res.render("account-settings", {
               check: true,
-              addressList: addressesToRender
+              addressList: addressesToRender,
+              paymentList: []
             });
           } else {
             res.render("login");
@@ -1139,7 +1173,8 @@ app.post("/address-add", function (req, res) {
           if (isAuth(req)) {
             res.render("account-settings", {
               check: true,
-              addressList: addressesToRender
+              addressList: addressesToRender,
+              paymentList: []
             });
           } else {
             res.render("login");
@@ -1177,6 +1212,84 @@ app.post("/delete-address", function (req, res) {
       console.log(err);
       res.render("delete-error");
     });
+});
+
+app.post("/payment-add", function(req, res) {
+
+  if (!(isAuth(req))) {
+    res.render("login");
+  }
+  // console.log(req.body);
+  var fullname = req.body.fullname;
+  var cardNumber = req.body.cardNumber;
+  var expDate = req.body.expDate;
+  var cvv = req.body.cvv;
+  var zipcode = req.body.zipcode;
+
+  var payment = new Payment({
+    userID: userID,
+    fullname: fullname,
+    cardNumber: cardNumber,
+    expirationDate: expDate,
+    cvv: cvv,
+    zip: zipcode
+  });
+
+  payment.save(function (err, doc) {
+    if (err) {
+      console.log(err);
+      res.render("upload-error", {
+        check: true,
+        error: err
+      });
+    } else {
+      console.log("Payment method added succesfully");
+      // console.log(doc);
+
+      var paymentMethodsToRender = [];
+
+      var promise = new Promise(function (resolve, reject) {
+        Payment.find({
+          userID: userID
+        }, function (err, payments) {
+          if (err) {
+            console.log(err);
+          } else {
+            paymentMethodsToRender = payments;
+            if (paymentMethodsToRender.length !== 0) {
+              resolve();
+            } else {
+              reject();
+            }
+          }
+        });
+      });
+
+      promise.then(function (result) {
+          if (isAuth(req)) {
+            res.render("account-settings", {
+              check: true,
+              addressList: [],
+              paymentList: paymentMethodsToRender
+            });
+          } else {
+            res.render("login");
+          }
+        },
+        function (err) {
+          console.log(err);
+          if (isAuth(req)) {
+            res.render("account-settings", {
+              check: true,
+              addressList: [],
+              paymentList: paymentMethodsToRender
+            });
+          } else {
+            res.render("login");
+          }
+        });
+    }
+  });
 });
 
 app.post("/shop/:itemType", function (req, res) {

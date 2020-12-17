@@ -570,6 +570,12 @@ input[type="file"] {
   margin: auto;
 }
 
+.payment-method-form {
+  display: none;
+  width: 800px;
+  margin: auto;
+}
+
 /* edit-item */
 
 .edit-form {
