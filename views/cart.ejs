@@ -1,0 +1,34 @@
+<%- include('partials/header') %>
+
+<div class="cart-page">
+    <h1>Shopping Cart</h1>
+    <hr>
+    <div class="cart">
+        <!-- itempic , item name , price -->
+        <!-- delete , save for later -->
+        <div class="cart-item">
+            <img class="cart-image"
+                src="https://kuiperbeltofbabies.s3.us-east-2.amazonaws.com/item-images/<%= cartImage %>" alt="">
+            <div class="cart-item-inner">
+                <div class="cart-item-details">
+                    <h4><%= itemName %></h4>
+                    <h4 style="margin-left: auto;"><%= itemPrice %></h4>
+                </div>
+                <div class="cart-item-options">
+                    <a href="">delete</a>
+                    <a href="">save for later</a>
+                </div>
+            </div>
+        </div>
+
+        <!-- subtotal -->
+        <!-- proceed to checkout -->
+        <div class="checkout">
+            <h4>Subtotal: <%= subTotal %></h4>
+            <button>Proceed to checkout</button>
+        </div>
+    </div>
+</div>
+
+
+<%- include('partials/footer') %>

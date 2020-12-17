@@ -270,6 +270,7 @@ input[type=password] {
 
 .sign-in-default {
   width: 60%;
+  padding-right: 60px;
 }
 
 .sign-in-alternates {
@@ -589,6 +590,42 @@ input[type="file"] {
   width: 1000px;
   margin: auto;
   padding: 50px 0;
+  text-align: center;
+}
+
+.cart-page {
+  width: 1200px;
+  margin: auto;
+}
+
+.cart {
+  display: flex;
+}
+
+.cart-item {
+  display: flex;
+  width: 950px;
+}
+
+.cart-image {
+  width: 150px;
+}
+
+.cart-item-inner {
+  display: block;
+  width: 800px;
+}
+
+.cart-item-details {
+  display: flex;
+}
+
+.cart-item-options {
+  display:  flex;
+}
+
+.checkout {
+  width: 250px;
   text-align: center;
 }
 

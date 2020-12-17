@@ -553,6 +553,7 @@ app.get("/user-items", function (req, res) {
 });
 
 app.get("/edit-address/:addressID", function (req, res) {
+
   var id = req.params.addressID;
   var userID;
   var fullname;
@@ -623,6 +624,16 @@ app.get("/edit-address/:addressID", function (req, res) {
         res.render("login");
       }
     });
+});
+
+app.get("/cart", function(req, res) {
+  res.render("cart", {
+    check: isAuth(req),
+    cartImage: "009c957d-2d41-4c00-a4af-282288391d3d.png",
+    itemName: "Test holder item name",
+    itemPrice: "$39.99",
+    subTotal: "$79.98"
+  });
 });
 
 app.post("/register", function (req, res) {
