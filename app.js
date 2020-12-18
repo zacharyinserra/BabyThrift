@@ -496,6 +496,17 @@ app.get("/edit-item/:itemID", function (req, res) {
 
 app.get("/account-settings", function (req, res) {
 
+  if (isAuth(req)) {
+    res.render("account-settings", {
+      check: true
+    });
+  } else {
+    res.render("login");
+  }
+});
+
+app.get("/account-settings/addresses", function (req, res) {
+
   var addressesToRender = [];
 
   var promise = new Promise(function (resolve, reject) {
@@ -517,10 +528,9 @@ app.get("/account-settings", function (req, res) {
 
   promise.then(function (result) {
       if (isAuth(req)) {
-        res.render("account-settings", {
+        res.render("addresses", {
           check: true,
-          addressList: addressesToRender,
-          paymentList:[]
+          addressList: addressesToRender
         });
       } else {
         res.render("login");
@@ -529,15 +539,64 @@ app.get("/account-settings", function (req, res) {
     function (err) {
       console.log(err);
       if (isAuth(req)) {
-        res.render("account-settings", {
+        res.render("addresses", {
           check: true,
-          addressList: addressesToRender,
-          paymentList: []
+          addressList: addressesToRender
         });
       } else {
         res.render("login");
       }
     });
+});
+
+app.get("/account-settings/payment-methods", function(req, res) {
+
+  var paymentMethodsToRender = [];
+
+  var promise = new Promise(function (resolve, reject) {
+    Payment.find({
+      userID: userID
+    }, function (err, payments) {
+      if (err) {
+        console.log(err);
+      } else {
+        paymentMethodsToRender = payments;
+        if (paymentMethodsToRender.length !== 0) {
+          resolve();
+        } else {
+          reject();
+        }
+      }
+    });
+  });
+
+  promise.then(function (result) {
+      if (isAuth(req)) {
+        res.render("payment-methods", {
+          check: true,
+          paymentList: paymentMethodsToRender
+        });
+      } else {
+        res.render("login");
+      }
+    },
+    function (err) {
+      console.log(err);
+      if (isAuth(req)) {
+        res.render("payment-methods", {
+          check: true,
+          paymentList: paymentMethodsToRender
+        });
+      } else {
+        res.render("login");
+      }
+    });
+});
+
+app.get("/account-settings/notification-preferences", function(req, res){
+  res.render("notification-preferences", {
+    check: isAuth(req)
+  });
 });
 
 app.get("/login", function (req, res) {
@@ -659,7 +718,7 @@ app.get("/edit-address/:addressID", function (req, res) {
     });
 });
 
-app.get("/cart", function(req, res) {
+app.get("/cart", function (req, res) {
   res.render("cart", {
     check: isAuth(req),
     cartImage: "009c957d-2d41-4c00-a4af-282288391d3d.png",
@@ -1104,7 +1163,7 @@ app.post("/edit-item/delete-item", function (req, res) {
     });
 });
 
-app.post("/address-add", function (req, res) {
+app.post("/account-settings/address-add", function (req, res) {
 
   if (!(isAuth(req))) {
     res.render("login");
@@ -1136,55 +1195,12 @@ app.post("/address-add", function (req, res) {
       });
     } else {
       console.log("Address added succesfully");
-      // console.log(doc);
-
-      var addressesToRender = [];
-
-      var promise = new Promise(function (resolve, reject) {
-        Address.find({
-          userID: userID
-        }, function (err, addresses) {
-          if (err) {
-            console.log(err);
-          } else {
-            addressesToRender = addresses;
-            if (addressesToRender.length !== 0) {
-              resolve();
-            } else {
-              reject();
-            }
-          }
-        });
-      });
-
-      promise.then(function (result) {
-          if (isAuth(req)) {
-            res.render("account-settings", {
-              check: true,
-              addressList: addressesToRender,
-              paymentList: []
-            });
-          } else {
-            res.render("login");
-          }
-        },
-        function (err) {
-          console.log(err);
-          if (isAuth(req)) {
-            res.render("account-settings", {
-              check: true,
-              addressList: addressesToRender,
-              paymentList: []
-            });
-          } else {
-            res.render("login");
-          }
-        });
+      res.redirect("/account-settings/addresses");
     }
   });
 });
 
-app.post("/delete-address", function (req, res) {
+app.post("/account-settings/delete-address", function (req, res) {
 
   if (!(isAuth(req))) {
     res.redirect("/login");
@@ -1206,7 +1222,7 @@ app.post("/delete-address", function (req, res) {
   });
 
   promise.then(function (result) {
-      res.redirect("/account-settings");
+      res.redirect("/account-settings/addresses");
     },
     function (err) {
       console.log(err);
@@ -1214,7 +1230,7 @@ app.post("/delete-address", function (req, res) {
     });
 });
 
-app.post("/payment-add", function(req, res) {
+app.post("/account-settings/payment-add", function (req, res) {
 
   if (!(isAuth(req))) {
     res.render("login");
@@ -1245,49 +1261,7 @@ app.post("/payment-add", function(req, res) {
     } else {
       console.log("Payment method added succesfully");
       // console.log(doc);
-
-      var paymentMethodsToRender = [];
-
-      var promise = new Promise(function (resolve, reject) {
-        Payment.find({
-          userID: userID
-        }, function (err, payments) {
-          if (err) {
-            console.log(err);
-          } else {
-            paymentMethodsToRender = payments;
-            if (paymentMethodsToRender.length !== 0) {
-              resolve();
-            } else {
-              reject();
-            }
-          }
-        });
-      });
-
-      promise.then(function (result) {
-          if (isAuth(req)) {
-            res.render("account-settings", {
-              check: true,
-              addressList: [],
-              paymentList: paymentMethodsToRender
-            });
-          } else {
-            res.render("login");
-          }
-        },
-        function (err) {
-          console.log(err);
-          if (isAuth(req)) {
-            res.render("account-settings", {
-              check: true,
-              addressList: [],
-              paymentList: paymentMethodsToRender
-            });
-          } else {
-            res.render("login");
-          }
-        });
+      res.redirect("/account-settings/payment-methods");
     }
   });
 });
@@ -1306,10 +1280,14 @@ app.post("/shop/:itemType", function (req, res) {
       //
       break;
     case "Price: High to Low":
-      sort = { price: -1};
+      sort = {
+        price: -1
+      };
       break;
     case "Price: Low to High":
-      sort = { price: 1};
+      sort = {
+        price: 1
+      };
       break;
     case "Closest":
       // Have to add some way of checking distance
@@ -1318,10 +1296,14 @@ app.post("/shop/:itemType", function (req, res) {
       //
       break;
     case "Condition: High to Low":
-      sort = { condition: -1 };
+      sort = {
+        condition: -1
+      };
       break;
     case "Condition: Low to High":
-      sort = { condition: 1 };
+      sort = {
+        condition: 1
+      };
       break;
     default:
       sort = {};

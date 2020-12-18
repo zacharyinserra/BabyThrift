@@ -1,0 +1,48 @@
+<%- include('partials/header') %>
+
+
+<div class="setting-blocks">
+    <h1>Payment Methods</h1>
+
+    <div class="payments">
+        <% paymentList.forEach(function(payment) { %>
+        <div class="outer-payment">
+            <div class="inner-paymenr">
+                <form action="delete-payment" method="POST"
+                    onsubmit="return confirm('Are you sure you want to delete this payment method?');">
+                    <div>
+                        <input name="paymentID" style="display:none;" value="<%= payment._id %>">
+                        <h6><b><%= payment.fullname %></b></h6>
+                        <h6><%= payment.cardNumber %></h6>
+                        <h6><%= payment.expirationDate %> <%= payment.cvv %>, <%= payment.zip %></h6>
+                    </div>
+                    <div>
+                        <a class="btn btn-light btn-sm" href="/edit-payment/<%= payment._id %>">Edit</a>
+                        <button type="submit" class="btn btn-dark btn-sm">Remove</button>
+                    </div>
+                </form>
+            </div>
+        </div>
+        <% }); %>
+    </div>
+
+    <button onclick="toggleAddPaymentMethod()">Add new payment method</button>
+    <form class="payment-method-form" method="POST" action="payment-add">
+        <div class="form-group">
+            <label for="fullname">Full name on card:</label>
+            <input name="fullname" type="text" class="form-control" id="fullname" required>
+            <label for="cardNumber">Card Number:</label>
+            <input name="cardNumber" type="text" class="form-control" id="cardNumber" placeholder="XXXX-XXXX-XXXX-XXXX"
+                required>
+            <label for="expDate">Exp. Date:</label>
+            <input name="expDate" type="text" class="form-control" id="expDate" required>
+            <label for="cvv">CVV:</label>
+            <input name="cvv" type="text" class="form-control" id="cvv" required>
+            <label for="zipcode">Zip Code:</label>
+            <input name="zipcode" type="text" class="form-control" id="zipcode" required>
+        </div>
+        <button type="submit" id="add-payment" class="btn btn-primary btn-lg btn-block">Add Payment Method</button>
+</div>
+
+
+<%- include('partials/footer') %>
