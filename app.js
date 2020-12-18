@@ -351,7 +351,8 @@ app.get("/item-upload", function (req, res) {
   }
 });
 
-app.get("/shop/:itemType", function (req, res) {
+app.get("/search-results/:itemType", function (req, res) {
+
   var itemsToRender = [];
   var promise = new Promise(function (resolve, reject) {
     Item.find({
@@ -370,7 +371,7 @@ app.get("/shop/:itemType", function (req, res) {
     }).limit(4);
   });
   promise.then(function (result) {
-      res.render("shop", {
+      res.render("search-results", {
         check: isAuth(req),
         placeholder: "",
         itemType: req.params.itemType,
@@ -495,7 +496,7 @@ app.get("/edit-item/:itemID", function (req, res) {
 });
 
 app.get("/account-settings", function (req, res) {
-
+  // Go to account settings page, check for authentication
   if (isAuth(req)) {
     res.render("account-settings", {
       check: true
@@ -549,7 +550,7 @@ app.get("/account-settings/addresses", function (req, res) {
     });
 });
 
-app.get("/account-settings/payment-methods", function(req, res) {
+app.get("/account-settings/payment-methods", function (req, res) {
 
   var paymentMethodsToRender = [];
 
@@ -593,7 +594,7 @@ app.get("/account-settings/payment-methods", function(req, res) {
     });
 });
 
-app.get("/account-settings/notification-preferences", function(req, res){
+app.get("/account-settings/notification-preferences", function (req, res) {
   res.render("notification-preferences", {
     check: isAuth(req)
   });
@@ -1013,7 +1014,7 @@ app.post("/edit-address/address-edit", function (req, res) {
     });
 });
 
-app.post("/search-results", function (req, res) {
+app.post("/search-results/:itemType?", function (req, res) {
   var search = req.body.searchText;
   var category = req.body.category;
 
@@ -1021,10 +1022,51 @@ app.post("/search-results", function (req, res) {
     category = ""
   }
 
+  if (req.params.itemType) {
+    category = req.params.itemType;
+  }
+
   var limit = parseInt(req.body.pageLimit);
   var page = parseInt(req.body.pageNumber);
   var next = req.body.next;
   var previous = req.body.previous;
+  var sortCriteria = req.body.sortCriteria;
+  var sort = {};
+
+  switch (sortCriteria) {
+    case "Featured":
+      //
+      break;
+    case "Price: High to Low":
+      sort = {
+        price: -1
+      };
+      break;
+    case "Price: Low to High":
+      sort = {
+        price: 1
+      };
+      break;
+    case "Closest":
+      // Have to add some way of checking distance
+      break;
+    case "Farthest":
+      //
+      break;
+    case "Condition: High to Low":
+      sort = {
+        condition: -1
+      };
+      break;
+    case "Condition: Low to High":
+      sort = {
+        condition: 1
+      };
+      break;
+    default:
+      sort = {};
+      break;
+  }
 
   if (limit == null || isNaN(limit)) {
     limit = gPageLimit;
@@ -1068,22 +1110,22 @@ app.post("/search-results", function (req, res) {
           reject();
         }
       }
-    }).limit(limit).skip(skip);
+    }).limit(limit).skip(skip).sort(sort);
   });
   promise.then(function (result) {
-      res.render("shop", {
-        check: isAuth(req),
-        itemList: itemsToRender,
-        itemType: "search-results",
-        pageNum: page + 1,
-        pageLimit: limit,
-        placeholder: search,
-        category: category
-      });
-    },
-    function (err) {
-      console.log("Error (promise): /search-results - " + err);
+    res.render("search-results", {
+      check: isAuth(req),
+      itemList: itemsToRender,
+      itemType: category,
+      pageNum: page + 1,
+      pageLimit: limit,
+      placeholder: search,
+      category: category,
+      sortCriteria: sortCriteria
     });
+  }).catch((err) => {
+    console.log("Error (promise): /search-results - " + err);
+  });
 });
 
 app.post("/edit-item/delete-item", function (req, res) {
@@ -1264,104 +1306,6 @@ app.post("/account-settings/payment-add", function (req, res) {
       res.redirect("/account-settings/payment-methods");
     }
   });
-});
-
-app.post("/shop/:itemType", function (req, res) {
-
-  var limit = parseInt(req.body.pageLimit);
-  var page = parseInt(req.body.pageNumber);
-  var next = req.body.next;
-  var previous = req.body.previous;
-  var sortCriteria = req.body.sortCriteria;
-  var sort = {};
-
-  switch (sortCriteria) {
-    case "Featured":
-      //
-      break;
-    case "Price: High to Low":
-      sort = {
-        price: -1
-      };
-      break;
-    case "Price: Low to High":
-      sort = {
-        price: 1
-      };
-      break;
-    case "Closest":
-      // Have to add some way of checking distance
-      break;
-    case "Farthest":
-      //
-      break;
-    case "Condition: High to Low":
-      sort = {
-        condition: -1
-      };
-      break;
-    case "Condition: Low to High":
-      sort = {
-        condition: 1
-      };
-      break;
-    default:
-      sort = {};
-      break;
-  }
-
-  if (limit == null || isNaN(limit)) {
-    limit = gPageLimit;
-  }
-
-  if (page == null || isNaN(page)) {
-    page = 0;
-  } else {
-    page = page - 1;
-  }
-
-  if (next === "") {
-    page = page + 1;
-  }
-  if (previous === "") {
-    if (page >= 1) {
-      page = page - 1;
-    }
-  }
-
-  var skip = page * limit;
-
-  var itemsToRender = [];
-  var promise = new Promise(function (resolve, reject) {
-    Item.find({
-      itemType: req.params.itemType
-    }, function (err, items) {
-      if (err) {
-        console.log("Error: /shop/:itemType - " + err);
-      } else {
-        itemsToRender = items;
-        if (itemsToRender.length !== 0) {
-          resolve();
-        } else {
-          reject();
-        }
-      }
-    }).limit(limit).skip(skip).sort(sort);
-  });
-  promise.then(function (result) {
-      res.render("shop", {
-        check: isAuth(req),
-        placeholder: "",
-        itemType: req.params.itemType,
-        itemList: itemsToRender,
-        pageNum: page + 1,
-        pageLimit: limit,
-        sortCriteria: sortCriteria
-      });
-    },
-    function (err) {
-      console.log("Error (promise): /shop/:itemType - " + err);
-    });
 });
 
 function isAuth(req) {

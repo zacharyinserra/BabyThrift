@@ -33,7 +33,11 @@
   <% }); %>
 </div>
 
-<form class="paginator" action="<%= itemType %>" method="POST">
+<% if (itemType) { %>
+  <form class="paginator" action="<%= itemType %>" method="POST">
+<% } else { %>
+  <form class="paginator" action="search-results" method="POST">
+<% } %>
   <input type="text" value="<%= placeholder %>" name="searchText" style="display: none;">
   <input type="text" value="<%= itemType %>" name="category" style="display: none;">
   <div class="limitor">
