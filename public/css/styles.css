@@ -3,6 +3,7 @@
   background-color: #212529;
   background-color: #617575;
   background-color: white;
+  background-color: #6c7d7c;
 }
 
 .header {
@@ -490,11 +491,9 @@ input[type="file"] {
 
 .item-display {
   width: 1300px;
-  margin: auto;
+  margin: 30px auto auto auto;
   display: flex;
-  border: solid;
-  border-width: 1px;
-  border-radius: .25rem;
+  box-shadow: 0 0 100px #6c7d7c;
   padding: 32px;
 }
 
@@ -639,7 +638,7 @@ input[type="file"] {
 
 footer {
   text-align: center;
-  margin-top: 100px;
+  margin-top: 30px;
   padding: 100px;
   background-color: #617575;
 }

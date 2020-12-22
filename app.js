@@ -745,6 +745,9 @@ app.post("/register", function (req, res) {
 });
 
 app.post("/login", function (req, res) {
+
+  var url = req.headers.referer;
+
   const user = new User({
     username: req.body.username,
     password: req.body.password
@@ -758,7 +761,7 @@ app.post("/login", function (req, res) {
         // Not google authentication
         isGoogleAuth = false;
         userID = req.user._id;
-        res.redirect("/");
+        res.redirect(url);
       });
     }
   });
