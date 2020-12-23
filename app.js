@@ -246,18 +246,12 @@ passport.use(new GoogleStrategy({
 app.get("/", function (req, res) {
   var itemsToRender = [];
   var promise = new Promise(function (resolve, reject) {
-    Item.find({
-
-    }, function (err, items) {
+    Item.find({}, function (err, items) {
       if (err) {
         console.log(err);
+        reject();
       } else {
-        itemsToRender = items;
-        if (itemsToRender.length !== 0) {
-          resolve();
-        } else {
-          reject();
-        }
+        resolve();
       }
     });
   });
@@ -368,7 +362,7 @@ app.get("/search-results/:itemType", function (req, res) {
           reject();
         }
       }
-    }).limit(4);
+    }).limit(gPageLimit);
   });
   promise.then(function (result) {
       res.render("search-results", {
@@ -600,6 +594,12 @@ app.get("/account-settings/notification-preferences", function (req, res) {
   });
 });
 
+app.get("/account-settings/delete-account", function (req, res) {
+  res.render("delete-account", {
+    check: isAuth(req)
+  });
+});
+
 app.get("/login", function (req, res) {
   res.render("login");
 });
@@ -620,13 +620,16 @@ app.get("/user-items", function (req, res) {
           reject();
         }
       }
-    });
+    }).limit(gPageLimit);
   });
   promise.then(function (result) {
       if (isAuth(req)) {
         res.render("user-items", {
           check: true,
-          itemList: itemsToRender
+          itemList: itemsToRender,
+          pageLimit: 4,
+          pageNum: 1,
+          sortCriteria: ""
         });
       } else {
         res.render("login");
@@ -637,7 +640,10 @@ app.get("/user-items", function (req, res) {
       if (isAuth(req)) {
         res.render("user-items", {
           check: true,
-          itemList: itemsToRender
+          itemList: itemsToRender,
+          pageLimit: 4,
+          pageNum: 1,
+          sortCriteria: ""
         });
       } else {
         res.render("login");
@@ -1308,6 +1314,183 @@ app.post("/account-settings/payment-add", function (req, res) {
       // console.log(doc);
       res.redirect("/account-settings/payment-methods");
     }
+  });
+});
+
+app.post("/user-items", function (req, res) {
+
+  var limit = parseInt(req.body.pageLimit);
+  var page = parseInt(req.body.pageNumber);
+  var next = req.body.next;
+  var previous = req.body.previous;
+  var sortCriteria = req.body.sortCriteria;
+  var sort = {};
+
+  switch (sortCriteria) {
+    case "Featured":
+      //
+      break;
+    case "Price: High to Low":
+      sort = {
+        price: -1
+      };
+      break;
+    case "Price: Low to High":
+      sort = {
+        price: 1
+      };
+      break;
+    case "Closest":
+      // Have to add some way of checking distance
+      break;
+    case "Farthest":
+      //
+      break;
+    case "Condition: High to Low":
+      sort = {
+        condition: -1
+      };
+      break;
+    case "Condition: Low to High":
+      sort = {
+        condition: 1
+      };
+      break;
+    default:
+      sort = {};
+      break;
+  }
+
+  if (limit == null || isNaN(limit)) {
+    limit = gPageLimit;
+  }
+  if (page == null || isNaN(page)) {
+    page = 0;
+  } else {
+    page = page - 1;
+  }
+
+  if (next === "") {
+    page = page + 1;
+  }
+  if (previous === "") {
+    if (page >= 1) {
+      page = page - 1;
+    }
+  }
+
+  var skip = page * limit;
+
+  var itemsToRender = [];
+
+  var promise = new Promise(function (resolve, reject) {
+    Item.find({
+      userID: userID
+    }, function (err, items) {
+      if (err) {
+        console.log(err);
+      } else {
+        itemsToRender = items;
+        if (itemsToRender.length !== 0) {
+          resolve();
+        } else {
+          reject();
+        }
+      }
+    }).limit(limit).skip(skip).sort(sort);
+  });
+  promise.then(function (result) {
+      if (isAuth(req)) {
+        res.render("user-items", {
+          check: true,
+          itemList: itemsToRender,
+          pageLimit: limit,
+          pageNum: page + 1,
+          sortCriteria: sortCriteria
+        });
+      } else {
+        res.render("login");
+      }
+    },
+    function (err) {
+      console.log(err);
+      if (isAuth(req)) {
+        res.render("user-items", {
+          check: true,
+          itemList: itemsToRender,
+          pageLimit: limit,
+          pageNum: page + 1,
+          sortCriteria: sortCriteria
+        });
+      } else {
+        res.render("login");
+      }
+    });
+});
+
+app.post("/account-settings/delete-account", function (req, res) {
+  if (userID === "") {
+    res.render("login");
+  }
+
+  var promise = new Promise(function (resolve, reject) {
+
+    // Delete all items
+    Item.deleteMany({
+      userID: userID
+    }, function (err, result) {
+      if (err) {
+        console.log(err);
+        reject();
+      } else {
+        console.log(result);
+      }
+    });
+
+    // Delete all addresses
+    Address.deleteMany({
+      userID: userID
+    }, function (err, result) {
+      if (err) {
+        console.log(err);
+        reject();
+      } else {
+        console.log(result);
+      }
+    });
+
+    // Delete all payment methods
+    Payment.deleteMany({
+      userID: userID
+    }, function (err, result) {
+      if (err) {
+        console.log(err);
+        reject();
+      } else {
+        console.log(result);
+      }
+    });
+
+    // Delete user
+    User.deleteOne({
+      _id: userID
+    }, function (err, result) {
+      if (err) {
+        console.log(err);
+        reject();
+      } else {
+        console.log(result);
+        resolve();
+      }
+    });
+  });
+
+  promise.then(function (result) {
+    console.log(result);
+    res.render("");
+  }, function (err) {
+    console.log(err);
+    res.render("");
   });
 });
 

@@ -10,13 +10,22 @@
       <form action="/register" method="POST">
         <div class="form-group">
           <label for="email">Email</label>
-          <input type="email" class="form-control" name="username">
+          <input type="email" class="form-control" name="username" id="username" required>
         </div>
         <div class="form-group">
           <label for="password">Password</label>
-          <input type="password" class="form-control" name="password" style="margin: 0; padding: .375rem .75rem;">
+          <input type="password" class="form-control" name="password" id="password"
+            style="margin: 0; padding: .375rem .75rem;" required>
         </div>
-        <button type="submit" class="btn btn-dark">Register</button>
+        <div class="form-group">
+          <label for="conf-password">Confirm Password</label>
+          <input type="password" class="form-control" name="conf-password" id="conf-password"
+            style="margin: 0; padding: .375rem .75rem;" required>
+        </div>
+        <div class="registrate">
+          <button disabled id="submit-btn" type="submit" class="btn btn-dark">Register</button>
+          <p id="match-indicator" style="display: none;">Passwords do not match</p>
+        </div>
       </form>
     </div>
     <div class="reg-separator">

@@ -255,8 +255,9 @@ input[type=password] {
 .reg {
   width: 1000px;
   display: block;
-  margin: auto;
-  padding-top: 40px;
+  margin: 30px auto auto auto;
+  padding: 40px;
+  box-shadow: 0 0 50px #6c7d7c;
 }
 
 .reg-inner {
@@ -267,6 +268,15 @@ input[type=password] {
 .reg-separator {
   display: block;
   width: 80px;
+}
+
+.registrate {
+  display: flex;
+}
+
+.registrate p {
+  margin: auto 0;
+  padding-left: 10px;
 }
 
 .sign-in-default {
@@ -493,7 +503,7 @@ input[type="file"] {
   width: 1300px;
   margin: 30px auto auto auto;
   display: flex;
-  box-shadow: 0 0 100px #6c7d7c;
+  box-shadow: 0 0 50px #6c7d7c;
   padding: 32px;
 }
 

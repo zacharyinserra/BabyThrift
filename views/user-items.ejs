@@ -25,5 +25,53 @@
     <% }); %>
 </div>
 
+<form class="paginator" action="" method="POST">
+    <div class="limitor">
+        <select name="pageLimit" id="page-limit" onchange="this.form.submit()">
+            <% switch(pageLimit) {
+          case 4: %>
+            <option selected value="4">4</option>
+            <option value="8">8</option>
+            <option value="12">12</option>
+            <% break;
+          case 8: %>
+            <option value="4">4</option>
+            <option selected value="8">8</option>
+            <option value="12">12</option>
+            <% break;
+          case 12: %>
+            <option value="4">4</option>
+            <option value="8">8</option>
+            <option selected value="12">12</option>
+            <% break;
+          default: %>
+            <option selected value="4">4</option>
+            <option value="8">8</option>
+            <option value="12">12</option>
+            <% break;
+          } %>
+        </select>
+    </div>
+    <div class="page">
+        <button name="previous">previous</button>
+        <input type="number" name="pageNumber" value="<%= pageNum %>">
+        <button name="next">next</button>
+    </div>
+    <div class="filter">
+        <select name="sortCriteria" id="sortCriteria" onchange="this.form.submit()">
+            <% 
+          var options = ["Featured", "Price: High to Low", "Price: Low to High", "Closest", "Farthest", "Condition: High to Low", "Condition: Low to High"];
+          for ( var i = 0; i < options.length; i++ )
+          {
+            if (options[i] === sortCriteria) { %>
+            <option selected value="<%= options[i] %>"><%= options[i] %></option>
+            <% } else { %>
+            <option value="<%= options[i] %>"><%= options[i] %></option>
+            <% }
+          } %>
+        </select>
+    </div>
+</form>
+
 
 <%- include('partials/footer') %>

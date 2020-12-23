@@ -1,6 +1,5 @@
 $("#image-file").change(function (ev) {
 
-    
     while (document.getElementById("images").firstChild) {
         document.getElementById("images").removeChild(document.getElementById("images").firstChild);
     }
@@ -27,8 +26,15 @@ $("#image-file").change(function (ev) {
     }
 });
 
-// $("#addItems").click(function (ev) {
-//     // Add a loading icon while item is uploaded
-//     $(".progress-bar").attr("aria-valuenow", "50");
-//     $(".progress-bar").css("width", "50");
-// });
+$("#conf-password").keyup(function (ev) {
+    var password = $("#password").val();
+    var confPassword = $("#conf-password").val();
+
+    if (password === confPassword) {
+        $("#submit-btn").prop("disabled", false);
+        $("#match-indicator").hide();
+    } else {
+        $("#submit-btn").prop("disabled", true);
+        $("#match-indicator").show();
+    }
+});

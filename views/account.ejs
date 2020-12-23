@@ -29,6 +29,7 @@
 </div>
 <div class="recent-items">
     <div class="account-user-item">
+        <% try { %>
         <% for (i = 0; i < 3; i++) { %>
         <div class="account-shop-item-links">
             <div class="account-shop-item">
@@ -51,6 +52,8 @@
                 </div>
             </div>
         </div>
+        <% } %>
+        <% } catch { %>
         <% } %>
     </div>
     <a href="/user-items" class="expand-button">View all of your items</a>
