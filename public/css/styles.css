@@ -1,9 +1,11 @@
 .colurz {
   background-color: #9EC4C5;
   background-color: #212529;
+  /* Dark button color */
   background-color: #617575;
   background-color: white;
-  background-color: #6c7d7c;
+  background-color: #bcdad8;
+  /* Box shadow color */
 }
 
 .header {
@@ -257,7 +259,7 @@ input[type=password] {
   display: block;
   margin: 30px auto auto auto;
   padding: 40px;
-  box-shadow: 0 0 50px #6c7d7c;
+  box-shadow: 0 0 50px #bcdad8;
 }
 
 .reg-inner {
@@ -503,7 +505,7 @@ input[type="file"] {
   width: 1300px;
   margin: 30px auto auto auto;
   display: flex;
-  box-shadow: 0 0 50px #6c7d7c;
+  box-shadow: 0 0 50px #bcdad8;
   padding: 32px;
 }
 
@@ -555,7 +557,20 @@ input[type="file"] {
 
 .setting-blocks {
   width: 1000px;
-  margin: auto;
+  margin: 30px auto auto auto;
+  box-shadow: 0 0 50px #bcdad8;
+  padding: 32px;
+  position: relative;
+}
+
+.close-button {
+  position: absolute;
+  right: 5px;
+  top: 5px;
+  width: 25px;
+  height: 25px;
+  text-align: center;
+  cursor: pointer;
 }
 
 .addresses {
@@ -579,10 +594,35 @@ input[type="file"] {
   margin: auto;
 }
 
+.payments {
+  display: inline-flex;
+  width: 100%;
+  padding-top: 10px;
+}
+
+.outer-payment {
+  width: 32%;
+  padding: 8px 8px 20px 0;
+}
+
+.inner-payment {
+  border: solid;
+  padding: 8px;
+}
+
 .payment-method-form {
+  background-color: white;
   display: none;
-  width: 800px;
+  width: 500px;
+  height: 240px;
   margin: auto;
+  position: fixed;
+  top: 0;
+  left: 0;
+  right: 0;
+  bottom: 0;
+  padding: 20px;
+  border-radius: 5px;
 }
 
 /* edit-item */
@@ -636,7 +676,7 @@ input[type="file"] {
 }
 
 .cart-item-options {
-  display:  flex;
+  display: flex;
 }
 
 .checkout {

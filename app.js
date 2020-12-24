@@ -100,6 +100,10 @@ const itemSchema = new mongoose.Schema({
     type: String,
     required: true
   },
+  condition: {
+    type: String,
+    required: true
+  },
   manufacturer: {
     type: String
   },
@@ -353,7 +357,7 @@ app.get("/search-results/:itemType", function (req, res) {
       itemType: req.params.itemType
     }, function (err, items) {
       if (err) {
-        console.log("Error: /shop/:itemType - " + err);
+        console.log("Error: /search-results/:itemType - " + err);
       } else {
         itemsToRender = items;
         if (itemsToRender.length !== 0) {
@@ -376,7 +380,7 @@ app.get("/search-results/:itemType", function (req, res) {
       });
     },
     function (err) {
-      console.log("Error (promise): /shop/:itemType - " + err);
+      console.log("Error (promise): /search-results/:itemType - " + err);
     });
 });
 
@@ -384,6 +388,7 @@ app.get("/item/:itemID", function (req, res) {
   var name;
   var desc;
   var manufacturer;
+  var condition;
   var price;
   var city;
   var state;
@@ -396,6 +401,7 @@ app.get("/item/:itemID", function (req, res) {
       name = item.name;
       desc = item.description;
       manufacturer = item.manufacturer;
+      condition = item.condition;
       price = item.price;
       city = item.city;
       state = item.state;
@@ -419,6 +425,7 @@ app.get("/item/:itemID", function (req, res) {
         itemName: name,
         itemDesc: desc,
         itemManu: manufacturer,
+        itemCondition: condition,
         itemPrice: price,
         itemCity: city,
         itemState: state,
@@ -440,6 +447,7 @@ app.get("/edit-item/:itemID", function (req, res) {
   var desc;
   var type;
   var manufacturer;
+  var condition;
   var price;
   var city;
   var state;
@@ -451,8 +459,9 @@ app.get("/edit-item/:itemID", function (req, res) {
     }, function (err, item) {
       name = item.name;
       desc = item.description;
-      type = item.itemType,
-        manufacturer = item.manufacturer;
+      type = item.itemType;
+      manufacturer = item.manufacturer;
+      condition = item.condition;
       price = item.price;
       city = item.city;
       state = item.state;
@@ -478,6 +487,7 @@ app.get("/edit-item/:itemID", function (req, res) {
         itemDesc: desc,
         itemType: type,
         itemManu: manufacturer,
+        itemCondition: condition,
         itemPrice: price,
         itemCity: city,
         itemState: state,
@@ -782,6 +792,7 @@ app.post("/database-add", upload.array("itemImages"), function (req, res) {
   var name = req.body.nameOfItem;
   var desc = req.body.descriptionOfItem;
   var type = req.body.typeOfItem;
+  var condition = req.body.conditionOfItem;
   var manufacturer = req.body.manufacturerOfItem;
   var price = req.body.priceOfItem;
   var city = req.body.cityOfItem;
@@ -847,6 +858,7 @@ app.post("/database-add", upload.array("itemImages"), function (req, res) {
       name: name,
       description: desc,
       itemType: type,
+      condition: condition,
       manufacturer: manufacturer,
       price: price,
       city: city,
@@ -870,6 +882,7 @@ app.post("/database-add", upload.array("itemImages"), function (req, res) {
           itemName: name,
           itemDesc: desc,
           itemType: type,
+          itemCondition: condition,
           itemManu: manufacturer,
           itemPrice: price,
           itemCity: city,
@@ -888,6 +901,7 @@ app.post("/edit-item/database-edit", function (req, res) {
   var desc = req.body.descriptionOfItem;
   var type = req.body.typeOfItem;
   var manufacturer = req.body.manufacturerOfItem;
+  var condition = req.body.conditionOfItem;
   var price = req.body.priceOfItem;
   var city = req.body.cityOfItem;
   var state = req.body.stateOfItem;
@@ -902,6 +916,7 @@ app.post("/edit-item/database-edit", function (req, res) {
       description: desc,
       itemType: type,
       manufacturer: manufacturer,
+      condition: condition,
       price: price,
       city: city,
       state: state
@@ -934,6 +949,7 @@ app.post("/edit-item/database-edit", function (req, res) {
       name = item.name;
       desc = item.description;
       manufacturer = item.manufacturer;
+      condition = item.condition;
       price = item.price;
       city = item.city;
       state = item.state;
@@ -958,6 +974,7 @@ app.post("/edit-item/database-edit", function (req, res) {
         itemName: name,
         itemDesc: desc,
         itemManu: manufacturer,
+        itemCondition: condition,
         itemPrice: price,
         itemCity: city,
         itemState: state,
@@ -1111,13 +1128,11 @@ app.post("/search-results/:itemType?", function (req, res) {
     }, function (err, items) {
       if (err) {
         console.log("Error: /search-results - " + err);
+        reject();
       } else {
+        console.log(items);
         itemsToRender = items;
-        if (itemsToRender.length !== 0) {
-          resolve();
-        } else {
-          reject();
-        }
+        resolve();
       }
     }).limit(limit).skip(skip).sort(sort);
   });

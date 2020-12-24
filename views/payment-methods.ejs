@@ -2,23 +2,25 @@
 
 
 <div class="setting-blocks">
-    <h1>Payment Methods</h1>
-
+    <h2>Payment Methods</h2>
+    <hr>
     <div class="payments">
         <% paymentList.forEach(function(payment) { %>
         <div class="outer-payment">
-            <div class="inner-paymenr">
+            <div class="inner-payment">
                 <form action="delete-payment" method="POST"
                     onsubmit="return confirm('Are you sure you want to delete this payment method?');">
                     <div>
                         <input name="paymentID" style="display:none;" value="<%= payment._id %>">
                         <h6><b><%= payment.fullname %></b></h6>
                         <h6><%= payment.cardNumber %></h6>
-                        <h6><%= payment.expirationDate %> <%= payment.cvv %>, <%= payment.zip %></h6>
+                        <h6><%= payment.expirationDate %></h6>
                     </div>
                     <div>
-                        <a class="btn btn-light btn-sm" href="/edit-payment/<%= payment._id %>">Edit</a>
-                        <button type="submit" class="btn btn-dark btn-sm">Remove</button>
+                        <a class="btn btn-light btn-sm" href="/edit-payment/<%= payment._id %>"
+                            style="background-color: #9EC4C5; color: #212529; border-color: #9EC4C5;">Edit</a>
+                        <button type="submit" class="btn btn-dark btn-sm"
+                            style="background-color: #212529;">Remove</button>
                     </div>
                 </form>
             </div>
@@ -26,22 +28,60 @@
         <% }); %>
     </div>
 
-    <button onclick="toggleAddPaymentMethod()">Add new payment method</button>
+    <button class="btn btn-dark btn-sm" onclick="openAddPaymentMethod()" style="background-color: #212529;">Add new
+        payment method</button>
+
     <form class="payment-method-form" method="POST" action="payment-add">
+        <a class="close-button" onclick="closeAddPaymentMethod()">&#x2715</a>
+        <!-- <button>&times;</button> -->
+        <!-- <button type="button" class="close" aria-label="Close">
+            <span aria-hidden="true">&times;</span>
+        </button> -->
         <div class="form-group">
-            <label for="fullname">Full name on card:</label>
-            <input name="fullname" type="text" class="form-control" id="fullname" required>
-            <label for="cardNumber">Card Number:</label>
-            <input name="cardNumber" type="text" class="form-control" id="cardNumber" placeholder="XXXX-XXXX-XXXX-XXXX"
-                required>
-            <label for="expDate">Exp. Date:</label>
-            <input name="expDate" type="text" class="form-control" id="expDate" required>
-            <label for="cvv">CVV:</label>
-            <input name="cvv" type="text" class="form-control" id="cvv" required>
-            <label for="zipcode">Zip Code:</label>
-            <input name="zipcode" type="text" class="form-control" id="zipcode" required>
+            <div style="display: flex;">
+                <div style="width: 250px;padding-right: 10px;">
+                    <label for="fullname">Full name on card:</label>
+                    <input style="padding: 12px 20px; margin: 0 0 8px 0" name="fullname" type="text" class="form-control" id="fullname" required="">
+                </div>
+                <div style="width: 250px;">
+                    <label for="cardNumber">Card Number:</label>
+                    <input style="padding: 12px 20px; margin: 0 0 8px 0" name="cardNumber" type="text" class="form-control" id="cardNumber"
+                        placeholder="XXXX-XXXX-XXXX-XXXX" required="">
+                </div>
+            </div>
+            <div style="display: flex;">
+                <div>
+                    <label for="expMonth">Exp. Date:</label>
+                    <div style="display: flex;">
+                        <select style="height: 37px; margin-right: 10px;" name="expMonth" id="expMonth">
+                            <option value="01">01</option>
+                            <option value="02">02</option>
+                            <option value="03">03</option>
+                            <option value="04">04</option>
+                            <option value="05">05</option>
+                            <option value="06">06</option>
+                            <option value="07">07</option>
+                            <option value="08">08</option>
+                            <option value="09">09</option>
+                            <option value="10">10</option>
+                            <option value="11">11</option>
+                            <option value="12">12</option>
+                        </select>
+                        <select style="height: 37px; margin-right: 10px;" name="expYear" id="expYear">
+                            <% for (i = 0; i < 21; i++) { %>
+                            <option value="<%= new Date().getFullYear() + i; %>"><%= new Date().getFullYear() + i; %>
+                            </option>
+                            <% } %>
+                        </select>
+                    </div>
+                </div>
+                <div style="padding-left: 50px;">
+                    <label for="zipcode">Zip Code:</label>
+                    <input style="padding: 12px 20px; margin: 0;" name="zipcode" type="text" class="form-control" id="zipcode" required>
+                </div>
+            </div>
         </div>
-        <button type="submit" id="add-payment" class="btn btn-primary btn-lg btn-block">Add Payment Method</button>
+        <button type="submit" id="add-payment" class="btn btn-dark btn-sm btn-block" style="background-color: #212529;"">Add Payment Method</button>
 </div>
 
 

@@ -22,11 +22,17 @@
                 <option value="Stroller">Stroller</option>
             </select>
         </div>
-        <!-- <div class="form-group">
-            <label class="btn btn-primary btn-lg" for="image-file">Upload Images</label>
-            <input class="custom-file-upload" type="file" id="image-file" name="itemImages" accept="images/*" multiple
-                required>
-        </div> -->
+        <div class="form-group" style="padding-left: 20px; width: 25%;">
+            <label for="condition" style="padding-bottom: 7.5px;">Condition:</label><br>
+            <select style="width: 150px; background-color: #212529;" id="condition" name="conditionOfItem"
+                class="btn btn-secondary btn-med dropdown-toggle" value="" required>
+                <option value="Brand New">Brand New</option>
+                <option value="Like New">Like New</option>
+                <option value="Very Good">Very Good</option>
+                <option value="Good">Good</option>
+                <option value="Acceptabler">Acceptable</option>
+            </select>
+        </div>
         <div id="images">
             <% for (i = 1; i < itemPics.length; i++) { %>
             <div class="image-remove-overlay">

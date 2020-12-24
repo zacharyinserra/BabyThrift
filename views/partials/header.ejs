@@ -14,6 +14,7 @@
   <script src="https://stackpath.bootstrapcdn.com/bootstrap/4.5.0/js/bootstrap.min.js"
     integrity="sha384-OgVRvuATP1z7JjHLkuOU7Xw704+h835Lr+6QL9UvYjZE3Ipu6Tp75j7Bh/kR0JKI" crossorigin="anonymous">
   </script>
+  <script src='https://kit.fontawesome.com/a076d05399.js'></script>
 
   <!-- CSS -->
   <link rel="stylesheet" href="https://stackpath.bootstrapcdn.com/bootstrap/4.5.0/css/bootstrap.min.css"
@@ -72,7 +73,7 @@
   <div class="header">
     <div class="welcome">
       <div class="btn-hamburger">
-        <button class="btn btn-dark btn-med" onclick="openNav()">[]</button>
+        <button class="btn btn-dark btn-med" onclick="openNav()">&#9776;</button>
       </div>
       <div class="btn-bb">
         <a class="btn btn-light btn-med" href="/">Baby Thrift</a>
@@ -80,17 +81,25 @@
     </div>
 
     <!-- Search Bar -->
-    <form class="input-group mb-3" action="search-results" method="POST">
+    <form class="input-group mb-3" action="../search-results" method="POST">
       <div class="input-group-prepend">
         <select name="category" class="btn btn-outline-secondary dropdown-toggle" data-toggle="dropdown"
           aria-haspopup="true" aria-expanded="false">
-          <option value="All">All</option>
-          <option value="Clothing">Clothing</option>
-          <option value="Furniture">Furniture</option>
-          <option value="Toys">Toys</option>
-          <option value="Stroller">Stroller</option>
+          <% var options = ["All", "Clothing", "Furniture", "Toys", "Stroller"]; %>
+          <% for ( var i = 0; i < options.length; i++ ) { %>
+            <% if (locals.category) { %>
+              <% if (options[i] === category) { %>
+              <option selected value="<%= options[i] %>"><%= options[i] %></option>
+              <% } else { %>
+              <option value="<%= options[i] %>"><%= options[i] %></option>
+              <% } %>
+            <% } else { %>
+              <option value="<%= options[i] %>"><%= options[i] %></option>
+            <% } %>
+          <% } %>
         </select>
       </div>
+
       <% if (locals.placeholder) { %>
       <input value="<%= placeholder %>" name="searchText" type="text" class="form-control" style="margin-top: 0">
       <% } else { %>
@@ -119,7 +128,8 @@
       </div>
       <% } %>
       <div class="btn-cart">
-        <a class="btn btn-light btn-med" href="/cart" role="button">CART</a>
+        <a style="padding: .375rem 10px;" class="btn btn-light btn-med" href="/cart" role="button"><i
+            style="font-size: 20px;" class='fas fa-shopping-cart'></i></a>
       </div>
     </div>
   </div>

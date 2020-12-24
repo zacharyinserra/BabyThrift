@@ -26,6 +26,22 @@ function removeImage(div) {
   div.parentNode.remove();
 }
 
+$(document).mouseup(function (e) {
+  var container = $(".payment-method-form");
+  // if the target of the click isn't the container nor a descendant of the container
+  if (!container.is(e.target) && container.has(e.target).length === 0) {
+    container.hide();
+    $("body").css("background-color", "rgb(255,255,255)");
+    $(".setting-blocks").css("box-shadow", "0 0 50px #bcdad8");
+  }
+});
+
+function closeForm(form) {
+  form.parent().hide();
+  $("body").css("background-color", "rgb(255,255,255)");
+  $(".setting-blocks").css("box-shadow", "0 0 50px #bcdad8");
+}
+
 function toggleAddAddress() {
   var display = $(".address-form").css("display");
   if (display === "none") {
@@ -35,11 +51,17 @@ function toggleAddAddress() {
   }
 }
 
-function toggleAddPaymentMethod() {
+function openAddPaymentMethod() {
   var display = $(".payment-method-form").css("display");
   if (display === "none") {
+    $("body").css("background-color", "rgba(0,0,0,0.5)");
+    $(".setting-blocks").css("box-shadow", "none");
     $(".payment-method-form").show();
-  } else {
-    $(".payment-method-form").hide();
   }
+}
+
+function closeAddPaymentMethod() {
+  $("body").css("background-color", "rgb(255,255,255)");
+  $(".setting-blocks").css("box-shadow", "0 0 50px #bcdad8");
+  $(".payment-method-form").hide();
 }
