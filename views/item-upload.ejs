@@ -10,11 +10,15 @@
     <form action="database-add" method="POST" enctype="multipart/form-data">
         <div class="name-type">
             <div class="form-group" style="padding-right: 20px; width: 50%;">
-                <label for="name">Name of item:</label>
+                <label for="name">Name of item</label>
                 <input name="nameOfItem" type="text" class="form-control" id="name" required>
             </div>
-            <div class="form-group" style="padding-left: 20px; width: 25%;">
-                <label for="type" style="padding-bottom: 7.5px;">Type of item:</label><br>
+            <div class="form-group">
+                <label for="manufacturer">Manufacturer</label>
+                <input name="manufacturerOfItem" type="text" class="form-control" id="manufacturer" required>
+            </div>
+            <div class="form-group" style="padding-left: 20px;">
+                <label for="type" style="padding-bottom: 7.5px;">Item Category</label><br>
                 <select style="width: 150px; background-color: #212529;" id="type" name="typeOfItem"
                     class="btn btn-secondary btn-med dropdown-toggle" value="" required>
                     <option value="Clothing">Clothing</option>
@@ -23,49 +27,33 @@
                     <option value="Stroller">Stroller</option>
                 </select>
             </div>
-            <div class="form-group" style="padding-left: 20px; width: 25%;">
-                <label for="condition" style="padding-bottom: 7.5px;">Condition:</label><br>
+        </div>
+        <div class="price-condition">
+            <div class="form-group">
+                <label for="priceOfItem">Asking price (USD)</label>
+                <input name="priceOfItem" type="text" class="form-control" id="price"
+                    placeholder="$" required>
+            </div>
+            <div class="form-group" style="padding-left: 20px;">
+                <label for="condition" style="padding-bottom: 7.5px;">Condition</label><br>
                 <select style="width: 150px; background-color: #212529;" id="condition" name="conditionOfItem"
                     class="btn btn-secondary btn-med dropdown-toggle" value="" required>
                     <option value="Brand New">Brand New</option>
                     <option value="Like New">Like New</option>
                     <option value="Very Good">Very Good</option>
                     <option value="Good">Good</option>
-                    <option value="Acceptabler">Acceptable</option>
+                    <option value="Acceptable">Acceptable</option>
                 </select>
             </div>
-        </div>
-        <div class="form-group">
-            <label for="description">Description:</label>
-            <textarea name="descriptionOfItem" class="form-control" id="description" rows="3" required></textarea>
-        </div>
-        <div class="form-group" style="padding-top: 15px;">
-            <label class="btn btn-primary btn-lg"  style="background-color: #9EC4C5; color: #212529; border-color: #9EC4C5;" for="image-file">Upload Images</label>
-            <input class="custom-file-upload" type="file" id="image-file" name="itemImages" accept="images/*" multiple
-                required>
-        </div>
-        <div id="images">
-            <div class="images-placeholder">
-                Upload at least one image of your item
-            </div>
-        </div>
-        <div class="form-group" style="padding-top: 25px;">
-            <label for="manufacturer">Manufacturer (if applciable):</label>
-            <input name="manufacturerOfItem" type="text" class="form-control" id="manufacturer" required>
-        </div>
-        <div class="form-group">
-            <label for="price">Asking price: (USD)</label>
-            <input name="priceOfItem" type="text" class="form-control" id="price" placeholder="$" required>
-        </div>
-        <div class="city-state">
-            <div class="form-group" style="padding-right: 20px; width: 50%;">
+            <div class="form-group" style="padding-left: 20px;">
                 <label for="city">City</label>
                 <input name="cityOfItem" type="text" class="form-control" id="city" placeholder="" required>
             </div>
-            <div class="form-group" style="padding-left: 20px; width: 50%;">
-                <label  style="padding-bottom: 7.5px;" for="state">State</label>
+            <div class="form-group" style="padding-left: 20px;">
+                <label style="padding-bottom: 7.5px;" for="state">State</label>
                 <br>
-                <select style="background-color: #212529;" id="state" name="stateOfItem" class="btn btn-secondary dropdown-toggle" required>
+                <select style="background-color: #212529;" id="state" name="stateOfItem"
+                    class="btn btn-secondary dropdown-toggle" required>
                     <option value="AL">Alabama</option>
                     <option value="AK">Alaska</option>
                     <option value="AZ">Arizona</option>
@@ -118,6 +106,22 @@
                     <option value="WI">Wisconsin</option>
                     <option value="WY">Wyoming</option>
                 </select>
+            </div>
+        </div>
+        <div class="form-group">
+            <label for="description">Description</label>
+            <textarea name="descriptionOfItem" class="form-control" id="description" rows="3" required></textarea>
+        </div>
+        <div class="form-group" style="padding-top: 15px;">
+            <label class="btn btn-primary btn-lg"
+                style="background-color: #9EC4C5; color: #212529; border-color: #9EC4C5;" for="image-file">Upload
+                Images</label>
+            <input class="custom-file-upload" type="file" id="image-file" name="itemImages" accept="images/*" multiple
+                required>
+        </div>
+        <div id="images">
+            <div class="images-placeholder">
+                Upload at least one image of your item
             </div>
         </div>
         <button id="add-items" class="btn btn-primary btn-lg btn-block">Add Item!</button>

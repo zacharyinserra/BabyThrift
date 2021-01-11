@@ -10,13 +10,14 @@ const session = require("express-session");
 const ejs = require("ejs");
 const bodyParser = require("body-parser");
 const mongo = require("mongodb");
+const ObjectId = require('mongodb').ObjectID;
 const mongoose = require("mongoose");
 const passport = require("passport");
 const passportLocalMongoose = require("passport-local-mongoose");
 const findOrCreate = require("mongoose-findorcreate");
 const GoogleStrategy = require("passport-google-oauth20").Strategy;
 const AWS = require('aws-sdk');
-const multer = require('multer')
+const multer = require('multer');
 
 const app = express();
 
@@ -69,6 +70,7 @@ mongoose.connect("mongodb://localhost:27017/babies", {
 mongoose.set("useCreateIndex", true);
 
 const userSchema = new mongoose.Schema({
+  fullname: String,
   username: String,
   password: String,
   googleId: String,
@@ -119,7 +121,11 @@ const itemSchema = new mongoose.Schema({
     type: String,
     required: true
   },
-  picture: String
+  picture: String,
+  views: {
+    type: Number,
+    default: 0
+  }
 });
 
 const Item = new mongoose.model("Item", itemSchema);
@@ -176,10 +182,6 @@ const paymentSchema = new mongoose.Schema({
   },
   expirationDate: {
     type: String,
-    required: true
-  },
-  cvv: {
-    type: Number,
     required: true
   },
   zip: {
@@ -393,6 +395,7 @@ app.get("/item/:itemID", function (req, res) {
   var city;
   var state;
   var pics;
+  var views;
 
   var promise = new Promise(function (resolve, reject) {
     Item.findOne({
@@ -406,6 +409,7 @@ app.get("/item/:itemID", function (req, res) {
       city = item.city;
       state = item.state;
       pics = item.picture;
+      views = item.views;
       if (err) {
         console.log(err);
       } else {
@@ -419,6 +423,30 @@ app.get("/item/:itemID", function (req, res) {
   });
 
   promise.then(function (result) {
+
+      var promise = new Promise(function (resolve, reject) {
+        Item.updateOne({
+          _id: req.params.itemID
+        }, {
+          $set: {
+            views: views + 1
+          }
+        }, function (err, res) {
+          if (err) {
+            console.log(err);
+            reject();
+          } else {
+            resolve();
+          }
+        });
+      });
+      promise.then(function (result) {
+          console.log("Views incremented");
+        },
+        function (err) {
+          console.log(err);
+        });
+
       pics = pics.split(";");
       res.render("item", {
         check: isAuth(req),
@@ -429,7 +457,8 @@ app.get("/item/:itemID", function (req, res) {
         itemPrice: price,
         itemCity: city,
         itemState: state,
-        itemPics: pics
+        itemPics: pics,
+        itemViews: views + 1
       });
     },
     function (err) {
@@ -662,7 +691,6 @@ app.get("/user-items", function (req, res) {
 });
 
 app.get("/edit-address/:addressID", function (req, res) {
-
   var id = req.params.addressID;
   var userID;
   var fullname;
@@ -686,14 +714,9 @@ app.get("/edit-address/:addressID", function (req, res) {
         zip = address.zip;
         if (err) {
           console.log("Error: /edit-address/:addressID - " + err);
+          reject();
         } else {
-          if (address) {
-            console.log("Address found.");
-            resolve();
-          } else {
-            console.log("No address found.");
-            reject();
-          }
+          resolve();
         }
       });
   });
@@ -717,21 +740,62 @@ app.get("/edit-address/:addressID", function (req, res) {
     },
     function (err) {
       console.log("Error (promise): /edit-address/:addressID - " + err);
+      res.render("error");
+    });
+});
+
+app.get("/edit-payment/:paymentID", function (req, res) {
+  var id = req.params.paymentID;
+  var userID;
+  var fullname;
+  var cardNumber;
+  var expDate;
+  var expMonth;
+  var expYear;
+  var zip;
+
+  var promise = new Promise(function (resolve, reject) {
+    Payment.findOne({
+        _id: id
+      },
+      function (err, payment) {
+        userID = payment.userID;
+        fullname = payment.fullname;
+        cardNumber = payment.cardNumber;
+        expDate = payment.expirationDate;
+        zip = payment.zip;
+
+        expMonth = expDate.split("/")[0];
+        expYear = expDate.split("/")[1];
+
+        if (err) {
+          console.log("Error: /edit-payment/:paymentID - " + err);
+          reject();
+        } else {
+          resolve();
+        }
+      });
+  });
+
+  promise.then(function (result) {
       if (isAuth(req)) {
-        res.render("edit-address", {
+        res.render("edit-payment", {
           check: true,
           id: id,
           userID: userID,
           fullname: fullname,
-          address1: address1,
-          address2: address2,
-          city: city,
-          state: state,
+          cardNumber: cardNumber,
+          expMonth: expMonth,
+          expYear: expYear,
           zip: zip
         });
       } else {
         res.render("login");
       }
+    },
+    function (err) {
+      console.log("Error (promise): /edit-payment/:paymentID - " + err);
+      res.render("error");
     });
 });
 
@@ -747,6 +811,7 @@ app.get("/cart", function (req, res) {
 
 app.post("/register", function (req, res) {
   User.register({
+    fullname: req.body.fullname,
     username: req.body.username
   }, req.body.password, function (err, user) {
     if (err) {
@@ -822,7 +887,7 @@ app.post("/database-add", upload.array("itemImages"), function (req, res) {
             console.log(err);
             reject();
           } else {
-            console.log(`File uploaded successfully. ${data.Location}`);
+            console.log("File uploaded successfully. ${data.Location}");
             resolve();
           }
         })
@@ -865,7 +930,6 @@ app.post("/database-add", upload.array("itemImages"), function (req, res) {
       state: state,
       picture: files.join(";")
     });
-    // console.log(dbItem._id);
     dbItem.save(function (err, doc) {
       if (err) {
         console.log(err);
@@ -875,7 +939,6 @@ app.post("/database-add", upload.array("itemImages"), function (req, res) {
         });
       } else {
         console.log("Item added succesfully");
-        // console.log(doc);
         res.render("upload-success", {
           check: true,
           itemID: dbItem._id,
@@ -905,89 +968,144 @@ app.post("/edit-item/database-edit", function (req, res) {
   var price = req.body.priceOfItem;
   var city = req.body.cityOfItem;
   var state = req.body.stateOfItem;
+  var removedImages = req.body.sourcesToRemove.split(";");
+  var pics;
+  var difference;
 
-  // Update item
-  var filter = {
-    _id: id
-  };
-  var update = {
-    $set: {
-      name: name,
-      description: desc,
-      itemType: type,
-      manufacturer: manufacturer,
-      condition: condition,
-      price: price,
-      city: city,
-      state: state
-      // Also pics eventually
-    },
-  };
-
-  var promise = new Promise(function (resolve, reject) {
-    Item.updateOne(filter, update, function (err, res) {
-      if (err) {
-        console.log(err);
-        reject();
-      } else {
-        resolve();
-      }
-    });
-  });
-  promise.then(function (result) {
-      console.log("Item updated.");
-    },
-    function (err) {
-      console.log(err);
-    });
-
-  // Find and render item
+  // Find current item pictures
   var promise = new Promise(function (resolve, reject) {
     Item.findOne({
-      _id: id
+      _id: ObjectId(id)
     }, function (err, item) {
-      name = item.name;
-      desc = item.description;
-      manufacturer = item.manufacturer;
-      condition = item.condition;
-      price = item.price;
-      city = item.city;
-      state = item.state;
       pics = item.picture;
       if (err) {
-        console.log(err);
+        reject(err);
       } else {
-        if (item) {
-          resolve();
-        } else {
-          reject();
-        }
+        resolve(item);
       }
     });
   });
-
   promise.then(function (result) {
-      pics = pics.split(";");
-      res.render("edit-success", {
-        check: isAuth(req),
-        itemID: id,
-        itemName: name,
-        itemDesc: desc,
-        itemManu: manufacturer,
-        itemCondition: condition,
-        itemPrice: price,
-        itemCity: city,
-        itemState: state,
-        itemPics: pics
+      console.log("Current pictures found");
+      console.log("Getting images to remove from S3 bucket");
+      // Get difference of removed pics and current pics
+      difference = pics.split(";").filter(x => !removedImages.includes(x));
+
+      // Update item in DB
+      var filter = {
+        _id: ObjectId(id)
+      };
+      var update = {
+        $set: {
+          name: name,
+          description: desc,
+          itemType: type,
+          manufacturer: manufacturer,
+          condition: condition,
+          price: price,
+          city: city,
+          state: state,
+          picture: difference.join(";")
+        },
+      };
+
+      var innerPromise = new Promise(function (resolve, reject) {
+        Item.updateOne(filter, update, function (err, result) {
+          if (err) {
+            reject(err);
+          } else {
+            resolve(result);
+          }
+        });
+      });
+      innerPromise.then(function (result) {
+          console.log("Item updated.");
+          console.log(result);
+        },
+        function (err) {
+          console.log(err);
+        });
+
+      // Remove pics from S3 bucket
+      removedImages.forEach(pic => {
+        var params = {
+          Bucket: bucketName,
+          Key: "item-images/" + pic,
+        };
+        var p = new Promise(function (resolve, reject) {
+          s3.deleteObject(params, function (err, data) {
+            if (err) {
+              reject(err);
+            } else {
+              resolve(data);
+            }
+          });
+        });
+        p.then(function (data) {
+            console.log("File deleted from S3 bucket successfully - " + pic);
+            // Find and render item
+            var promise = new Promise(function (resolve, reject) {
+              Item.findOne({
+                _id: ObjectId(id)
+              }, function (err, item) {
+                name = item.name;
+                desc = item.description;
+                manufacturer = item.manufacturer;
+                condition = item.condition;
+                price = item.price;
+                city = item.city;
+                state = item.state;
+                pics = item.picture;
+                if (err) {
+                  console.log(err);
+                } else {
+                  if (item) {
+                    resolve();
+                  } else {
+                    reject();
+                  }
+                }
+              });
+            });
+            promise.then(function (result) {
+                pics = pics.split(";");
+                res.render("edit-success", {
+                  check: isAuth(req),
+                  itemID: id,
+                  itemName: name,
+                  itemDesc: desc,
+                  itemManu: manufacturer,
+                  itemCondition: condition,
+                  itemPrice: price,
+                  itemCity: city,
+                  itemState: state,
+                  itemPics: pics
+                });
+              },
+              function (err) {
+                console.log(err);
+                //render error page
+                res.render("edit-error");
+              });
+          },
+          function (err) {
+            //render error page
+            console.log("Error occurred deleting pictures from S3 bucket - " + err);
+          });
       });
     },
     function (err) {
-      console.log(err);
-      res.render("edit-error");
+      //render error page
+      console.log("Error occured retrieving current item pictures - " + err);
     });
 });
 
 app.post("/edit-address/address-edit", function (req, res) {
+
+  if (!(isAuth(req))) {
+    res.render("login");
+  }
+
   console.log("Begin address edit");
   var id = req.body.addressID;
   var fullname = req.body.fullname;
@@ -1013,6 +1131,62 @@ app.post("/edit-address/address-edit", function (req, res) {
 
   var promise = new Promise(function (resolve, reject) {
     Address.updateOne(filter, update, function (err, res) {
+      if (err) {
+        console.log(err);
+        reject();
+      } else {
+        resolve();
+      }
+    });
+  });
+  promise.then(function (result) {
+      if (isAuth(req)) {
+        res.redirect("/account-settings");
+      } else {
+        res.render("login");
+      }
+    },
+    function (err) {
+      console.log(err);
+      if (isAuth(req)) {
+        res.render("error", {
+          check: true
+        });
+      } else {
+        res.render("login");
+      }
+    });
+});
+
+app.post("/edit-payment/payment-edit", function (req, res) {
+
+  if (!(isAuth(req))) {
+    res.render("login");
+  }
+
+  console.log("Begin edit payment method");
+  var id = req.body.paymentID;
+  var fullname = req.body.fullname;
+  var cardNumber = req.body.cardNumber;
+  var expDate;
+  var expMonth = req.body.expMonth;
+  var expYear = req.body.expYear;
+  var zipcode = req.body.zipcode;
+
+  var filter = {
+    _id: id
+  };
+  var update = {
+    $set: {
+      fullname: fullname,
+      cardNumber: cardNumber,
+      expirationDate: expMonth + "/" + expYear,
+      zip: zipcode
+    },
+  };
+
+  var promise = new Promise(function (resolve, reject) {
+    Payment.updateOne(filter, update, function (err, res) {
       if (err) {
         console.log(err);
         reject();
@@ -1301,19 +1475,19 @@ app.post("/account-settings/payment-add", function (req, res) {
   if (!(isAuth(req))) {
     res.render("login");
   }
-  // console.log(req.body);
+
   var fullname = req.body.fullname;
   var cardNumber = req.body.cardNumber;
-  var expDate = req.body.expDate;
-  var cvv = req.body.cvv;
+  var expDate;
+  var expMonth = req.body.expMonth;
+  var expYear = req.body.expYear;
   var zipcode = req.body.zipcode;
 
   var payment = new Payment({
     userID: userID,
     fullname: fullname,
     cardNumber: cardNumber,
-    expirationDate: expDate,
-    cvv: cvv,
+    expirationDate: expMonth + "/" + expYear,
     zip: zipcode
   });
 
@@ -1326,7 +1500,6 @@ app.post("/account-settings/payment-add", function (req, res) {
       });
     } else {
       console.log("Payment method added succesfully");
-      // console.log(doc);
       res.redirect("/account-settings/payment-methods");
     }
   });
@@ -1525,6 +1698,18 @@ function uuidv4() {
       v = c == 'x' ? r : (r & 0x3 | 0x8);
     return v.toString(16);
   });
+}
+
+function dbFindOne(collection, query) {
+  return new Promise((resolve, reject) => {
+    collection.findOne(query, (err, res) => {
+      if (err) {
+        reject(err);
+        return;
+      }
+      resolve(res);
+    })
+  })
 }
 
 app.listen(3000, function () {

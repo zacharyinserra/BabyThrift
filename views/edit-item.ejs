@@ -38,9 +38,10 @@
             <div class="image-remove-overlay">
                 <img class="product-images"
                     src="https://kuiperbeltofbabies.s3.us-east-2.amazonaws.com/item-images/<%= itemPics[i] %>" alt="">
-                <!-- <button class="btn-image-delete">Remove</button> -->
+                <button class="btn btn-secondary btn-sm btn-image-delete" type="button" onclick="removeImage(this)">Remove</button>
             </div>
             <% } %>
+            <input id="sourcesToRemove" name="sourcesToRemove" type="text" style="display:none;">
         </div>
         <div class="form-group">
             <label for="manufacturer">Manufacturer (if applciable):</label>

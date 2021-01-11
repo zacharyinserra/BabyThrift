@@ -1,3 +1,6 @@
+var sources = [];
+
+
 // Open/Close login box
 function openLogin() {
   $('#login').fadeIn(200);
@@ -23,6 +26,10 @@ function setMainImage(img) {
 }
 
 function removeImage(div) {
+  var src = div.parentNode.children[0].src;
+  src = src.substring(src.lastIndexOf("/") + 1);
+  sources.push(src);
+  $("#sourcesToRemove").val(sources.join(";"));
   div.parentNode.remove();
 }
 

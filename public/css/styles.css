@@ -413,6 +413,9 @@ input[type="file"] {
   top: 10px;
   right: 10px;
   position: absolute;
+  background-color: #212529;
+  border-color: #212529;
+  color: white;
 }
 
 .name-type {
@@ -420,6 +423,10 @@ input[type="file"] {
 }
 
 .city-state {
+  display: flex;
+}
+
+.price-condition {
   display: flex;
 }
 

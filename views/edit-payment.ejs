@@ -1,0 +1,60 @@
+<%- include('partials/header') %>
+
+
+<form class="edit-payment-method-form" method="POST" action="payment-edit" style="display: block;">
+    <input name="paymentID" type="text" value="<%= id %>" style="display: none;">
+    <div class="form-group">
+        <div style="display: flex;">
+            <div style="width: 250px; padding-right: 10px;">
+                <label for="fullname">Full name on card:</label>
+                <input value="<%= fullname %>" style="padding: 12px 20px; margin: 0 0 8px 0" name="fullname" type="text"
+                    class="form-control" id="fullname" required="">
+            </div>
+            <div style="width: 250px;">
+                <label for="cardNumber">Card Number:</label>
+                <input value="<%= cardNumber %>" style="padding: 12px 20px; margin: 0 0 8px 0" name="cardNumber"
+                    type="text" class="form-control" id="cardNumber" placeholder="XXXX-XXXX-XXXX-XXXX" required="">
+            </div>
+        </div>
+        <div style="display: flex;">
+            <div>
+                <label for="expMonth">Exp. Date:</label>
+                <div style="display: flex;">
+                    <select valuestyle="height: 37px; margin-right: 10px;" name="expMonth" id="expMonth">
+                        <% 
+                        var options = [01, 02, 03, 04, 05, 06, 07, 08, 09, 10, 11, 12];
+                        for ( var i = 0; i < options.length; i++ ) {
+                          if (options[i] == expMonth) { %>
+                        <option selected value="<%= options[i] %>"><%= options[i] %></option>
+                        <% } else { %>
+                        <option value="<%= options[i] %>"><%= options[i] %></option>
+                        <% }
+                          } %>
+                    </select>
+                    <select style="height: 37px; margin-right: 10px;" name="expYear" id="expYear">
+                        <% for (i = 0; i < 21; i++) {
+                            if (new Date().getFullYear() + i == expYear) { %>
+
+                        <option selected value="<%= new Date().getFullYear() + i; %>">
+                            <%= new Date().getFullYear() + i; %>
+                        </option>
+                        <% } else { %>
+                        <option value="<%= new Date().getFullYear() + i; %>"><%= new Date().getFullYear() + i; %>
+                        </option>
+                        <% }
+                         } %>
+                    </select>
+                </div>
+            </div>
+            <div style="padding-left: 50px;">
+                <label for="zipcode">Zip Code:</label>
+                <input value="<%= zip %>" style="padding: 12px 20px; margin: 0;" name="zipcode" type="text" class="form-control"
+                    id="zipcode" required>
+            </div>
+        </div>
+    </div>
+    <button type="submit" id="add-payment" class="btn btn-dark btn-sm btn-block" style="background-color: #212529;"">Update Payment Method</button>
+</form>
+
+
+<%- include('partials/footer') %>

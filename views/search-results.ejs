@@ -24,6 +24,7 @@
         <hr>
         <p><b>Seller:</b> XXXXXXX</p>
         <p><b>Location:</b> <%= item.city %>, <%= item.state %></p>
+        <p><%= item.views %></p>
       </div>
       <div class="shop-item-overlay">
         <button>View Details</button>
@@ -34,8 +35,8 @@
 </div>
 
 <% if (itemType) { %>
-  <form class="paginator" action="<%= itemType %>" method="POST">
-<% } else { %>
+<form class="paginator" action="<%= itemType %>" method="POST">
+  <% } else { %>
   <form class="paginator" action="search-results" method="POST">
     <% } %>
     <input type="text" value="<%= placeholder %>" name="searchText" style="display: none;">
