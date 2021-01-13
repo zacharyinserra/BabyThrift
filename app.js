@@ -193,6 +193,21 @@ const paymentSchema = new mongoose.Schema({
 const Payment = new mongoose.model("Payment", paymentSchema);
 
 
+// Wishlist Schema
+const wishlistSchema = new mongoose.Schema({
+  userID: {
+    type: String,
+    required: true
+  },
+  itemID: {
+    type: String,
+    required: true
+  }
+});
+
+const Wishlist = new mongoose.model("Wishlist", wishlistSchema);
+
+
 // AWS S3
 
 const bucketName = process.env.BUCKETNAME;
@@ -300,6 +315,11 @@ app.get("/logout", function (req, res) {
 });
 
 app.get("/account", function (req, res) {
+
+  if (!(isAuth(req))) {
+    res.render("login");
+  }
+
   var itemsToRender = [];
   // Retreive items from database for specific user based on their ID
   var promise = new Promise(function (resolve, reject) {
@@ -387,6 +407,7 @@ app.get("/search-results/:itemType", function (req, res) {
 });
 
 app.get("/item/:itemID", function (req, res) {
+  var id = req.params.itemID;
   var name;
   var desc;
   var manufacturer;
@@ -399,7 +420,7 @@ app.get("/item/:itemID", function (req, res) {
 
   var promise = new Promise(function (resolve, reject) {
     Item.findOne({
-      _id: req.params.itemID
+      _id: id
     }, function (err, item) {
       name = item.name;
       desc = item.description;
@@ -450,6 +471,7 @@ app.get("/item/:itemID", function (req, res) {
       pics = pics.split(";");
       res.render("item", {
         check: isAuth(req),
+        itemID: id,
         itemName: name,
         itemDesc: desc,
         itemManu: manufacturer,
@@ -468,9 +490,9 @@ app.get("/item/:itemID", function (req, res) {
 
 app.get("/edit-item/:itemID", function (req, res) {
 
-  // if (!(isAuth(req)) || userID === "") {
-  //   res.redirect(req.baseUrl + "login");
-  // }
+  if (!(isAuth(req))) {
+    res.render("login");
+  }
 
   var name;
   var desc;
@@ -529,7 +551,6 @@ app.get("/edit-item/:itemID", function (req, res) {
 });
 
 app.get("/account-settings", function (req, res) {
-  // Go to account settings page, check for authentication
   if (isAuth(req)) {
     res.render("account-settings", {
       check: true
@@ -540,6 +561,10 @@ app.get("/account-settings", function (req, res) {
 });
 
 app.get("/account-settings/addresses", function (req, res) {
+
+  if (!(isAuth(req))) {
+    res.render("login");
+  }
 
   var addressesToRender = [];
 
@@ -585,6 +610,10 @@ app.get("/account-settings/addresses", function (req, res) {
 
 app.get("/account-settings/payment-methods", function (req, res) {
 
+  if (!(isAuth(req))) {
+    res.render("login");
+  }
+
   var paymentMethodsToRender = [];
 
   var promise = new Promise(function (resolve, reject) {
@@ -628,12 +657,22 @@ app.get("/account-settings/payment-methods", function (req, res) {
 });
 
 app.get("/account-settings/notification-preferences", function (req, res) {
+
+  if (!(isAuth(req))) {
+    res.render("login");
+  }
+
   res.render("notification-preferences", {
     check: isAuth(req)
   });
 });
 
 app.get("/account-settings/delete-account", function (req, res) {
+
+  if (!(isAuth(req))) {
+    res.render("login");
+  }
+
   res.render("delete-account", {
     check: isAuth(req)
   });
@@ -644,6 +683,11 @@ app.get("/login", function (req, res) {
 });
 
 app.get("/user-items", function (req, res) {
+
+  if (!(isAuth(req))) {
+    res.render("login");
+  }
+
   var itemsToRender = [];
   var promise = new Promise(function (resolve, reject) {
     Item.find({
@@ -691,6 +735,11 @@ app.get("/user-items", function (req, res) {
 });
 
 app.get("/edit-address/:addressID", function (req, res) {
+
+  if (!(isAuth(req))) {
+    res.render("login");
+  }
+
   var id = req.params.addressID;
   var userID;
   var fullname;
@@ -745,6 +794,11 @@ app.get("/edit-address/:addressID", function (req, res) {
 });
 
 app.get("/edit-payment/:paymentID", function (req, res) {
+
+  if (!(isAuth(req))) {
+    res.render("login");
+  }
+
   var id = req.params.paymentID;
   var userID;
   var fullname;
@@ -800,6 +854,11 @@ app.get("/edit-payment/:paymentID", function (req, res) {
 });
 
 app.get("/cart", function (req, res) {
+
+  if (!(isAuth(req))) {
+    res.render("login");
+  }
+
   res.render("cart", {
     check: isAuth(req),
     cartImage: "009c957d-2d41-4c00-a4af-282288391d3d.png",
@@ -958,6 +1017,11 @@ app.post("/database-add", upload.array("itemImages"), function (req, res) {
 });
 
 app.post("/edit-item/database-edit", function (req, res) {
+
+  if (!(isAuth(req))) {
+    res.render("login");
+  }
+
   console.log("Begin edit");
   var id = req.body.itemID;
   var name = req.body.nameOfItem;
@@ -1328,6 +1392,10 @@ app.post("/search-results/:itemType?", function (req, res) {
 
 app.post("/edit-item/delete-item", function (req, res) {
 
+  if (!(isAuth(req))) {
+    res.render("login");
+  }
+
   var id = req.body.itemID;
   var name;
   var desc;
@@ -1443,7 +1511,7 @@ app.post("/account-settings/address-add", function (req, res) {
 app.post("/account-settings/delete-address", function (req, res) {
 
   if (!(isAuth(req))) {
-    res.redirect("/login");
+    res.render("login");
   }
 
   var id = req.body.addressID;
@@ -1499,13 +1567,17 @@ app.post("/account-settings/payment-add", function (req, res) {
         error: err
       });
     } else {
-      console.log("Payment method added succesfully");
+      console.log("Payment method added succesfully - " + doc);
       res.redirect("/account-settings/payment-methods");
     }
   });
 });
 
 app.post("/user-items", function (req, res) {
+
+  if (!(isAuth(req))) {
+    res.render("login");
+  }
 
   var limit = parseInt(req.body.pageLimit);
   var page = parseInt(req.body.pageNumber);
@@ -1617,7 +1689,8 @@ app.post("/user-items", function (req, res) {
 });
 
 app.post("/account-settings/delete-account", function (req, res) {
-  if (userID === "") {
+
+  if (!(isAuth(req))) {
     res.render("login");
   }
 
@@ -1680,6 +1753,34 @@ app.post("/account-settings/delete-account", function (req, res) {
     console.log(err);
     res.render("");
   });
+});
+
+app.post("/item/wishlist-add/:itemID", function (req, res) {
+
+  if (!(isAuth(req))) {
+    res.render("login");
+  }
+
+  var itemID = req.params.itemID;
+
+  var wishlistItem = new Wishlist({
+    userID: userID,
+    itemID: itemID
+  });
+
+  wishlistItem.save(function (err, doc) {
+    if (err) {
+      console.log(err);
+      res.render("upload-error", {
+        check: true,
+        error: err
+      });
+    } else {
+      console.log("Item added to wishlist - " + doc);
+      res.redirect("back");
+    }
+  });
+
 });
 
 function isAuth(req) {

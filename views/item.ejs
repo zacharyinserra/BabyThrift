@@ -21,6 +21,18 @@
     <h6><%= itemDesc %></h6>
     <h6><%= itemViews %></h6>
   </div>
+  <div class="item-options">
+    <div class="btn-holder">
+      <button class="btn btn-dark btn-md" style="background-color: #212529;">Add to Cart</button>
+    </div>
+    <div class="btn-holder">
+      <button class="btn btn-light btn-md" style="background-color: #9EC4C5; color: #212529; border-color: #9EC4C5;">Buy Now</button>
+    </div>
+    <form class="btn-holder" method="POST" action="wishlist-add/<%= itemID %>">
+      <button type="submit" class="btn btn-dark btn-sm" style="background-color: #212529; width: 125px;">Add to Wishlist</button>
+    </form>
+  </div>
 </div>
+
 
 <%- include('partials/footer') %>

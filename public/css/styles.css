@@ -542,6 +542,23 @@ input[type="file"] {
 
 .information {
   padding: 32px;
+  width: 700px;
+}
+
+.item-options {
+  width: 200px;
+  border: solid 1px;
+  border-radius: 5px;
+  text-align: center;
+}
+
+.item-options button {
+  width: 150px;
+  margin: auto;
+}
+
+.btn-holder {
+  padding-top: 10px;
 }
 
 /* Item upload success page and delete item success page*/

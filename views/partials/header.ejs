@@ -73,7 +73,7 @@
   <div class="header">
     <div class="welcome">
       <div class="btn-hamburger">
-        <button class="btn btn-dark btn-med" onclick="openNav()">&#9776;</button>
+        <button class="btn btn-dark btn-med" style="background-color: #212529;" onclick="openNav()">&#9776;</button>
       </div>
       <div class="btn-bb">
         <a class="btn btn-light btn-med" href="/">Baby Thrift</a>
@@ -87,15 +87,15 @@
           aria-haspopup="true" aria-expanded="false">
           <% var options = ["All", "Clothing", "Furniture", "Toys", "Stroller"]; %>
           <% for ( var i = 0; i < options.length; i++ ) { %>
-            <% if (locals.category) { %>
-              <% if (options[i] === category) { %>
-              <option selected value="<%= options[i] %>"><%= options[i] %></option>
-              <% } else { %>
-              <option value="<%= options[i] %>"><%= options[i] %></option>
-              <% } %>
-            <% } else { %>
-              <option value="<%= options[i] %>"><%= options[i] %></option>
-            <% } %>
+          <% if (locals.category) { %>
+          <% if (options[i] === category) { %>
+          <option selected value="<%= options[i] %>"><%= options[i] %></option>
+          <% } else { %>
+          <option value="<%= options[i] %>"><%= options[i] %></option>
+          <% } %>
+          <% } else { %>
+          <option value="<%= options[i] %>"><%= options[i] %></option>
+          <% } %>
           <% } %>
         </select>
       </div>
@@ -117,14 +117,14 @@
         <a class="btn btn-light btn-med" href="/account" role="button">Account</a>
       </div>
       <div class="btn-logout">
-        <a class="btn btn-dark btn-med" href="/logout" role="button">Logout</a>
+        <a class="btn btn-dark btn-med" style="background-color: #212529;" href="/logout" role="button">Logout</a>
       </div>
       <% } else { %>
       <div class="btn-register">
         <a class="btn btn-light btn-med" href="/register" role="button">Register</a>
       </div>
       <div class="btn-login">
-        <a class="btn btn-dark btn-med" role="button" onclick="openLogin()">Login</a>
+        <a class="btn btn-dark btn-med" style="background-color: #212529;" role="button" onclick="openLogin()">Login</a>
       </div>
       <% } %>
       <div class="btn-cart">
