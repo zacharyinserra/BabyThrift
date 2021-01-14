@@ -1,7 +1,7 @@
 <%- include('partials/header') %>
 
 
-<form class="edit-payment-method-form" method="POST" action="payment-edit" style="display: block;">
+<form class="edit-payment-method-form" method="POST" action="payment-edit?_method=PATCH" style="display: block;">
     <input name="paymentID" type="text" value="<%= id %>" style="display: none;">
     <div class="form-group">
         <div style="display: flex;">

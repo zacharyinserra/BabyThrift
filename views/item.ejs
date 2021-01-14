@@ -28,7 +28,7 @@
     <div class="btn-holder">
       <button class="btn btn-light btn-md" style="background-color: #9EC4C5; color: #212529; border-color: #9EC4C5;">Buy Now</button>
     </div>
-    <form class="btn-holder" method="POST" action="wishlist-add/<%= itemID %>">
+    <form class="btn-holder" method="POST" action="wishlist-add/<%= itemID %>?_method=PUT">
       <button type="submit" class="btn btn-dark btn-sm" style="background-color: #212529; width: 125px;">Add to Wishlist</button>
     </form>
   </div>

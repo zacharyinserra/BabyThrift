@@ -18,6 +18,7 @@ const findOrCreate = require("mongoose-findorcreate");
 const GoogleStrategy = require("passport-google-oauth20").Strategy;
 const AWS = require('aws-sdk');
 const multer = require('multer');
+const methodOverride = require('method-override');
 
 const app = express();
 
@@ -35,6 +36,7 @@ app.use(session({
   resave: false,
   saveUninitialized: false
 }));
+app.use(methodOverride('_method'));
 
 app.use(passport.initialize());
 app.use(passport.session());
@@ -263,6 +265,8 @@ passport.use(new GoogleStrategy({
 
 
 // API routes
+
+// GET
 
 app.get("/", function (req, res) {
   var itemsToRender = [];
@@ -868,6 +872,8 @@ app.get("/cart", function (req, res) {
   });
 });
 
+// POST
+
 app.post("/register", function (req, res) {
   User.register({
     fullname: req.body.fullname,
@@ -907,7 +913,236 @@ app.post("/login", function (req, res) {
   });
 });
 
-app.post("/database-add", upload.array("itemImages"), function (req, res) {
+app.post("/user-items", function (req, res) {
+
+  if (!(isAuth(req))) {
+    res.render("login");
+  }
+
+  var limit = parseInt(req.body.pageLimit);
+  var page = parseInt(req.body.pageNumber);
+  var next = req.body.next;
+  var previous = req.body.previous;
+  var sortCriteria = req.body.sortCriteria;
+  var sort = {};
+
+  switch (sortCriteria) {
+    case "Featured":
+      //
+      break;
+    case "Price: High to Low":
+      sort = {
+        price: -1
+      };
+      break;
+    case "Price: Low to High":
+      sort = {
+        price: 1
+      };
+      break;
+    case "Closest":
+      // Have to add some way of checking distance
+      break;
+    case "Farthest":
+      //
+      break;
+    case "Condition: High to Low":
+      sort = {
+        condition: -1
+      };
+      break;
+    case "Condition: Low to High":
+      sort = {
+        condition: 1
+      };
+      break;
+    default:
+      sort = {};
+      break;
+  }
+
+  if (limit == null || isNaN(limit)) {
+    limit = gPageLimit;
+  }
+  if (page == null || isNaN(page)) {
+    page = 0;
+  } else {
+    page = page - 1;
+  }
+
+  if (next === "") {
+    page = page + 1;
+  }
+  if (previous === "") {
+    if (page >= 1) {
+      page = page - 1;
+    }
+  }
+
+  var skip = page * limit;
+
+  var itemsToRender = [];
+
+  var promise = new Promise(function (resolve, reject) {
+    Item.find({
+      userID: userID
+    }, function (err, items) {
+      if (err) {
+        console.log(err);
+      } else {
+        itemsToRender = items;
+        if (itemsToRender.length !== 0) {
+          resolve();
+        } else {
+          reject();
+        }
+      }
+    }).limit(limit).skip(skip).sort(sort);
+  });
+  promise.then(function (result) {
+      if (isAuth(req)) {
+        res.render("user-items", {
+          check: true,
+          itemList: itemsToRender,
+          pageLimit: limit,
+          pageNum: page + 1,
+          sortCriteria: sortCriteria
+        });
+      } else {
+        res.render("login");
+      }
+    },
+    function (err) {
+      console.log(err);
+      if (isAuth(req)) {
+        res.render("user-items", {
+          check: true,
+          itemList: itemsToRender,
+          pageLimit: limit,
+          pageNum: page + 1,
+          sortCriteria: sortCriteria
+        });
+      } else {
+        res.render("login");
+      }
+    });
+});
+
+app.post("/search-results/:itemType?", function (req, res) {
+  var search = req.body.searchText;
+  var category = req.body.category;
+
+  if (category === "All") {
+    category = ""
+  }
+
+  if (req.params.itemType) {
+    category = req.params.itemType;
+  }
+
+  var limit = parseInt(req.body.pageLimit);
+  var page = parseInt(req.body.pageNumber);
+  var next = req.body.next;
+  var previous = req.body.previous;
+  var sortCriteria = req.body.sortCriteria;
+  var sort = {};
+
+  switch (sortCriteria) {
+    case "Featured":
+      //
+      break;
+    case "Price: High to Low":
+      sort = {
+        price: -1
+      };
+      break;
+    case "Price: Low to High":
+      sort = {
+        price: 1
+      };
+      break;
+    case "Closest":
+      // Have to add some way of checking distance
+      break;
+    case "Farthest":
+      //
+      break;
+    case "Condition: High to Low":
+      sort = {
+        condition: -1
+      };
+      break;
+    case "Condition: Low to High":
+      sort = {
+        condition: 1
+      };
+      break;
+    default:
+      sort = {};
+      break;
+  }
+
+  if (limit == null || isNaN(limit)) {
+    limit = gPageLimit;
+  }
+  if (page == null || isNaN(page)) {
+    page = 0;
+  } else {
+    page = page - 1;
+  }
+
+  if (next === "") {
+    page = page + 1;
+  }
+  if (previous === "") {
+    if (page >= 1) {
+      page = page - 1;
+    }
+  }
+
+  var skip = page * limit;
+
+  var itemsToRender = [];
+  var promise = new Promise(function (resolve, reject) {
+    // db.getCollection('items').find({"name":{$regex:".*test.*", $options: "i"}, "itemType":{$regex: ".*Clothing.*"}})
+    Item.find({
+      name: {
+        $regex: ".*" + search + ".*",
+        $options: "i"
+      },
+      itemType: {
+        $regex: ".*" + category + ".*"
+      }
+    }, function (err, items) {
+      if (err) {
+        console.log("Error: /search-results - " + err);
+        reject();
+      } else {
+        console.log(items);
+        itemsToRender = items;
+        resolve();
+      }
+    }).limit(limit).skip(skip).sort(sort);
+  });
+  promise.then(function (result) {
+    res.render("search-results", {
+      check: isAuth(req),
+      itemList: itemsToRender,
+      itemType: category,
+      pageNum: page + 1,
+      pageLimit: limit,
+      placeholder: search,
+      category: category,
+      sortCriteria: sortCriteria
+    });
+  }).catch((err) => {
+    console.log("Error (promise): /search-results - " + err);
+  });
+});
+
+// PUT
+
+app.put("/database-add", upload.array("itemImages"), function (req, res) {
 
   if (!(isAuth(req))) {
     res.redirect("/login");
@@ -1016,7 +1251,108 @@ app.post("/database-add", upload.array("itemImages"), function (req, res) {
   });
 });
 
-app.post("/edit-item/database-edit", function (req, res) {
+app.put("/account-settings/address-add", function (req, res) {
+
+  if (!(isAuth(req))) {
+    res.render("login");
+  }
+  console.log(req.body);
+  var fullname = req.body.fullname;
+  var address1 = req.body.address1;
+  var address2 = req.body.address2;
+  var city = req.body.city;
+  var state = req.body.state;
+  var zipcode = req.body.zipcode;
+
+  var address = new Address({
+    userID: userID,
+    fullname: fullname,
+    address1: address1,
+    address2: address2,
+    city: city,
+    state: state,
+    zip: zipcode
+  });
+
+  address.save(function (err, doc) {
+    if (err) {
+      console.log(err);
+      res.render("upload-error", {
+        check: true,
+        error: err
+      });
+    } else {
+      console.log("Address added succesfully");
+      res.redirect("/account-settings/addresses");
+    }
+  });
+});
+
+app.put("/account-settings/payment-add", function (req, res) {
+
+  if (!(isAuth(req))) {
+    res.render("login");
+  }
+
+  var fullname = req.body.fullname;
+  var cardNumber = req.body.cardNumber;
+  var expDate;
+  var expMonth = req.body.expMonth;
+  var expYear = req.body.expYear;
+  var zipcode = req.body.zipcode;
+
+  var payment = new Payment({
+    userID: userID,
+    fullname: fullname,
+    cardNumber: cardNumber,
+    expirationDate: expMonth + "/" + expYear,
+    zip: zipcode
+  });
+
+  payment.save(function (err, doc) {
+    if (err) {
+      console.log(err);
+      res.render("upload-error", {
+        check: true,
+        error: err
+      });
+    } else {
+      console.log("Payment method added succesfully - " + doc);
+      res.redirect("/account-settings/payment-methods");
+    }
+  });
+});
+
+app.put("/item/wishlist-add/:itemID", function (req, res) {
+
+  if (!(isAuth(req))) {
+    res.render("login");
+  }
+
+  var itemID = req.params.itemID;
+
+  var wishlistItem = new Wishlist({
+    userID: userID,
+    itemID: itemID
+  });
+
+  wishlistItem.save(function (err, doc) {
+    if (err) {
+      console.log(err);
+      res.render("upload-error", {
+        check: true,
+        error: err
+      });
+    } else {
+      console.log("Item added to wishlist - " + doc);
+      res.redirect("back");
+    }
+  });
+});
+
+// PATCH/UPDATE
+
+app.patch("/edit-item/database-edit", function (req, res) {
 
   if (!(isAuth(req))) {
     res.render("login");
@@ -1164,7 +1500,7 @@ app.post("/edit-item/database-edit", function (req, res) {
     });
 });
 
-app.post("/edit-address/address-edit", function (req, res) {
+app.patch("/edit-address/address-edit", function (req, res) {
 
   if (!(isAuth(req))) {
     res.render("login");
@@ -1222,7 +1558,7 @@ app.post("/edit-address/address-edit", function (req, res) {
     });
 });
 
-app.post("/edit-payment/payment-edit", function (req, res) {
+app.patch("/edit-payment/payment-edit", function (req, res) {
 
   if (!(isAuth(req))) {
     res.render("login");
@@ -1278,119 +1614,9 @@ app.post("/edit-payment/payment-edit", function (req, res) {
     });
 });
 
-app.post("/search-results/:itemType?", function (req, res) {
-  var search = req.body.searchText;
-  var category = req.body.category;
+// DELETE
 
-  if (category === "All") {
-    category = ""
-  }
-
-  if (req.params.itemType) {
-    category = req.params.itemType;
-  }
-
-  var limit = parseInt(req.body.pageLimit);
-  var page = parseInt(req.body.pageNumber);
-  var next = req.body.next;
-  var previous = req.body.previous;
-  var sortCriteria = req.body.sortCriteria;
-  var sort = {};
-
-  switch (sortCriteria) {
-    case "Featured":
-      //
-      break;
-    case "Price: High to Low":
-      sort = {
-        price: -1
-      };
-      break;
-    case "Price: Low to High":
-      sort = {
-        price: 1
-      };
-      break;
-    case "Closest":
-      // Have to add some way of checking distance
-      break;
-    case "Farthest":
-      //
-      break;
-    case "Condition: High to Low":
-      sort = {
-        condition: -1
-      };
-      break;
-    case "Condition: Low to High":
-      sort = {
-        condition: 1
-      };
-      break;
-    default:
-      sort = {};
-      break;
-  }
-
-  if (limit == null || isNaN(limit)) {
-    limit = gPageLimit;
-  }
-  if (page == null || isNaN(page)) {
-    page = 0;
-  } else {
-    page = page - 1;
-  }
-
-  if (next === "") {
-    page = page + 1;
-  }
-  if (previous === "") {
-    if (page >= 1) {
-      page = page - 1;
-    }
-  }
-
-  var skip = page * limit;
-
-  var itemsToRender = [];
-  var promise = new Promise(function (resolve, reject) {
-    // db.getCollection('items').find({"name":{$regex:".*test.*", $options: "i"}, "itemType":{$regex: ".*Clothing.*"}})
-    Item.find({
-      name: {
-        $regex: ".*" + search + ".*",
-        $options: "i"
-      },
-      itemType: {
-        $regex: ".*" + category + ".*"
-      }
-    }, function (err, items) {
-      if (err) {
-        console.log("Error: /search-results - " + err);
-        reject();
-      } else {
-        console.log(items);
-        itemsToRender = items;
-        resolve();
-      }
-    }).limit(limit).skip(skip).sort(sort);
-  });
-  promise.then(function (result) {
-    res.render("search-results", {
-      check: isAuth(req),
-      itemList: itemsToRender,
-      itemType: category,
-      pageNum: page + 1,
-      pageLimit: limit,
-      placeholder: search,
-      category: category,
-      sortCriteria: sortCriteria
-    });
-  }).catch((err) => {
-    console.log("Error (promise): /search-results - " + err);
-  });
-});
-
-app.post("/edit-item/delete-item", function (req, res) {
+app.delete("/edit-item/delete-item", function (req, res) {
 
   if (!(isAuth(req))) {
     res.render("login");
@@ -1471,44 +1697,7 @@ app.post("/edit-item/delete-item", function (req, res) {
     });
 });
 
-app.post("/account-settings/address-add", function (req, res) {
-
-  if (!(isAuth(req))) {
-    res.render("login");
-  }
-  console.log(req.body);
-  var fullname = req.body.fullname;
-  var address1 = req.body.address1;
-  var address2 = req.body.address2;
-  var city = req.body.city;
-  var state = req.body.state;
-  var zipcode = req.body.zipcode;
-
-  var address = new Address({
-    userID: userID,
-    fullname: fullname,
-    address1: address1,
-    address2: address2,
-    city: city,
-    state: state,
-    zip: zipcode
-  });
-
-  address.save(function (err, doc) {
-    if (err) {
-      console.log(err);
-      res.render("upload-error", {
-        check: true,
-        error: err
-      });
-    } else {
-      console.log("Address added succesfully");
-      res.redirect("/account-settings/addresses");
-    }
-  });
-});
-
-app.post("/account-settings/delete-address", function (req, res) {
+app.delete("/account-settings/delete-address", function (req, res) {
 
   if (!(isAuth(req))) {
     res.render("login");
@@ -1538,157 +1727,7 @@ app.post("/account-settings/delete-address", function (req, res) {
     });
 });
 
-app.post("/account-settings/payment-add", function (req, res) {
-
-  if (!(isAuth(req))) {
-    res.render("login");
-  }
-
-  var fullname = req.body.fullname;
-  var cardNumber = req.body.cardNumber;
-  var expDate;
-  var expMonth = req.body.expMonth;
-  var expYear = req.body.expYear;
-  var zipcode = req.body.zipcode;
-
-  var payment = new Payment({
-    userID: userID,
-    fullname: fullname,
-    cardNumber: cardNumber,
-    expirationDate: expMonth + "/" + expYear,
-    zip: zipcode
-  });
-
-  payment.save(function (err, doc) {
-    if (err) {
-      console.log(err);
-      res.render("upload-error", {
-        check: true,
-        error: err
-      });
-    } else {
-      console.log("Payment method added succesfully - " + doc);
-      res.redirect("/account-settings/payment-methods");
-    }
-  });
-});
-
-app.post("/user-items", function (req, res) {
-
-  if (!(isAuth(req))) {
-    res.render("login");
-  }
-
-  var limit = parseInt(req.body.pageLimit);
-  var page = parseInt(req.body.pageNumber);
-  var next = req.body.next;
-  var previous = req.body.previous;
-  var sortCriteria = req.body.sortCriteria;
-  var sort = {};
-
-  switch (sortCriteria) {
-    case "Featured":
-      //
-      break;
-    case "Price: High to Low":
-      sort = {
-        price: -1
-      };
-      break;
-    case "Price: Low to High":
-      sort = {
-        price: 1
-      };
-      break;
-    case "Closest":
-      // Have to add some way of checking distance
-      break;
-    case "Farthest":
-      //
-      break;
-    case "Condition: High to Low":
-      sort = {
-        condition: -1
-      };
-      break;
-    case "Condition: Low to High":
-      sort = {
-        condition: 1
-      };
-      break;
-    default:
-      sort = {};
-      break;
-  }
-
-  if (limit == null || isNaN(limit)) {
-    limit = gPageLimit;
-  }
-  if (page == null || isNaN(page)) {
-    page = 0;
-  } else {
-    page = page - 1;
-  }
-
-  if (next === "") {
-    page = page + 1;
-  }
-  if (previous === "") {
-    if (page >= 1) {
-      page = page - 1;
-    }
-  }
-
-  var skip = page * limit;
-
-  var itemsToRender = [];
-
-  var promise = new Promise(function (resolve, reject) {
-    Item.find({
-      userID: userID
-    }, function (err, items) {
-      if (err) {
-        console.log(err);
-      } else {
-        itemsToRender = items;
-        if (itemsToRender.length !== 0) {
-          resolve();
-        } else {
-          reject();
-        }
-      }
-    }).limit(limit).skip(skip).sort(sort);
-  });
-  promise.then(function (result) {
-      if (isAuth(req)) {
-        res.render("user-items", {
-          check: true,
-          itemList: itemsToRender,
-          pageLimit: limit,
-          pageNum: page + 1,
-          sortCriteria: sortCriteria
-        });
-      } else {
-        res.render("login");
-      }
-    },
-    function (err) {
-      console.log(err);
-      if (isAuth(req)) {
-        res.render("user-items", {
-          check: true,
-          itemList: itemsToRender,
-          pageLimit: limit,
-          pageNum: page + 1,
-          sortCriteria: sortCriteria
-        });
-      } else {
-        res.render("login");
-      }
-    });
-});
-
-app.post("/account-settings/delete-account", function (req, res) {
+app.delete("/account-settings/delete-account", function (req, res) {
 
   if (!(isAuth(req))) {
     res.render("login");
@@ -1753,34 +1792,6 @@ app.post("/account-settings/delete-account", function (req, res) {
     console.log(err);
     res.render("");
   });
-});
-
-app.post("/item/wishlist-add/:itemID", function (req, res) {
-
-  if (!(isAuth(req))) {
-    res.render("login");
-  }
-
-  var itemID = req.params.itemID;
-
-  var wishlistItem = new Wishlist({
-    userID: userID,
-    itemID: itemID
-  });
-
-  wishlistItem.save(function (err, doc) {
-    if (err) {
-      console.log(err);
-      res.render("upload-error", {
-        check: true,
-        error: err
-      });
-    } else {
-      console.log("Item added to wishlist - " + doc);
-      res.redirect("back");
-    }
-  });
-
 });
 
 function isAuth(req) {

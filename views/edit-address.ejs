@@ -1,7 +1,7 @@
 <%- include('partials/header') %>
 
 
-<form class="address-form" method="POST" action="address-edit" style="display: block;">
+<form class="address-form" method="POST" action="address-edit?_method=PATCH" style="display: block;">
     <div class="form-group">
         <input name="addressID" type="text" value="<%= id %>" style="display: none;">
         <label for="fullname">Full Name:</label>
