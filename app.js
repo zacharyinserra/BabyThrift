@@ -268,28 +268,7 @@ passport.use(new GoogleStrategy({
 
 // GET
 
-app.get("/", function (req, res) {
-  var itemsToRender = [];
-  var promise = new Promise(function (resolve, reject) {
-    Item.find({}, function (err, items) {
-      if (err) {
-        console.log(err);
-        reject();
-      } else {
-        resolve();
-      }
-    });
-  });
-  promise.then(function (result) {
-      res.render("home", {
-        check: isAuth(req),
-        itemList: itemsToRender
-      });
-    },
-    function (err) {
-      console.log(err);
-    });
-});
+//  Authentication
 
 app.get("/register", function (req, res) {
   res.render("register", {
@@ -318,35 +297,40 @@ app.get("/logout", function (req, res) {
   res.redirect("/");
 });
 
-app.get("/account", function (req, res) {
+app.get("/login", function (req, res) {
+  res.render("login");
+});
 
+//  Pages
+
+app.get("/", function (req, res) {
+  // Grab all DB items for the home page
+  dbFind(Item).then(function (result) {
+      res.render("home", {
+        check: isAuth(req),
+        itemList: result
+      });
+    },
+    function (err) {
+      console.log(err);
+    });
+});
+
+app.get("/account", function (req, res) {
   if (!(isAuth(req))) {
     res.render("login");
   }
 
-  var itemsToRender = [];
-  // Retreive items from database for specific user based on their ID
-  var promise = new Promise(function (resolve, reject) {
-    Item.find({
-      userID: userID
-    }, function (err, items) {
-      if (err) {
-        console.log(err);
-      } else {
-        itemsToRender = items;
-        if (itemsToRender.length !== 0) {
-          resolve();
-        } else {
-          reject();
-        }
-      }
-    });
-  });
-  promise.then(function (result) {
+  // Grab users items for account page
+  var query = {
+    userID: userID
+  };
+
+  dbFind(Item, query).then(function (result) {
       if (isAuth(req)) {
         res.render("account", {
           check: true,
-          itemList: itemsToRender
+          itemList: result
         });
       } else {
         res.render("login");
@@ -376,85 +360,43 @@ app.get("/item-upload", function (req, res) {
 });
 
 app.get("/search-results/:itemType", function (req, res) {
+  // For browse category buttons on home page
+  // Grab items based on item type
+  var query = {
+    itemType: req.params.itemType
+  };
 
-  var itemsToRender = [];
-  var promise = new Promise(function (resolve, reject) {
-    Item.find({
-      itemType: req.params.itemType
-    }, function (err, items) {
-      if (err) {
-        console.log("Error: /search-results/:itemType - " + err);
-      } else {
-        itemsToRender = items;
-        if (itemsToRender.length !== 0) {
-          resolve();
-        } else {
-          reject();
-        }
-      }
-    }).limit(gPageLimit);
-  });
-  promise.then(function (result) {
+  dbFind(Item, query, gPageLimit).then(function (result) {
       res.render("search-results", {
         check: isAuth(req),
         placeholder: "",
         itemType: req.params.itemType,
-        itemList: itemsToRender,
+        itemList: result,
         pageNum: 1,
         pageLimit: gPageLimit,
         sortCriteria: ""
       });
     },
     function (err) {
-      console.log("Error (promise): /search-results/:itemType - " + err);
+      console.log("Error: /search-results/:itemType - " + err);
     });
 });
 
 app.get("/item/:itemID", function (req, res) {
+  // Grab single item based on the itemID
   var id = req.params.itemID;
-  var name;
-  var desc;
-  var manufacturer;
-  var condition;
-  var price;
-  var city;
-  var state;
-  var pics;
-  var views;
 
-  var promise = new Promise(function (resolve, reject) {
-    Item.findOne({
-      _id: id
-    }, function (err, item) {
-      name = item.name;
-      desc = item.description;
-      manufacturer = item.manufacturer;
-      condition = item.condition;
-      price = item.price;
-      city = item.city;
-      state = item.state;
-      pics = item.picture;
-      views = item.views;
-      if (err) {
-        console.log(err);
-      } else {
-        if (item) {
-          resolve();
-        } else {
-          reject();
-        }
-      }
-    });
-  });
+  var query = {
+    _id: id
+  };
 
-  promise.then(function (result) {
-
+  dbFindOne(Item, query).then(function (result) {
       var promise = new Promise(function (resolve, reject) {
         Item.updateOne({
           _id: req.params.itemID
         }, {
           $set: {
-            views: views + 1
+            views: result.views + 1
           }
         }, function (err, res) {
           if (err) {
@@ -472,19 +414,18 @@ app.get("/item/:itemID", function (req, res) {
           console.log(err);
         });
 
-      pics = pics.split(";");
       res.render("item", {
         check: isAuth(req),
-        itemID: id,
-        itemName: name,
-        itemDesc: desc,
-        itemManu: manufacturer,
-        itemCondition: condition,
-        itemPrice: price,
-        itemCity: city,
-        itemState: state,
-        itemPics: pics,
-        itemViews: views + 1
+        itemID: result.id,
+        itemName: result.name,
+        itemDesc: result.description,
+        itemManu: result.manufacturer,
+        itemCondition: result.condition,
+        itemPrice: result.price,
+        itemCity: result.city,
+        itemState: result.state,
+        itemPics: result.picture.split(";"),
+        itemViews: result.views + 1
       });
     },
     function (err) {
@@ -493,60 +434,28 @@ app.get("/item/:itemID", function (req, res) {
 });
 
 app.get("/edit-item/:itemID", function (req, res) {
-
   if (!(isAuth(req))) {
     res.render("login");
   }
 
-  var name;
-  var desc;
-  var type;
-  var manufacturer;
-  var condition;
-  var price;
-  var city;
-  var state;
-  var pics;
+  // Grab single item to fill out item edit form
+  var query = {
+    _id: req.params.itemID
+  };
 
-  var promise = new Promise(function (resolve, reject) {
-    Item.findOne({
-      _id: req.params.itemID
-    }, function (err, item) {
-      name = item.name;
-      desc = item.description;
-      type = item.itemType;
-      manufacturer = item.manufacturer;
-      condition = item.condition;
-      price = item.price;
-      city = item.city;
-      state = item.state;
-      pics = item.picture;
-      if (err) {
-        console.log(err);
-      } else {
-        if (item) {
-          resolve();
-        } else {
-          reject();
-        }
-      }
-    });
-  });
-
-  promise.then(function (result) {
-      pics = pics.split(";");
+  dbFindOne(Item, query).then(function (result) {
       res.render("edit-item", {
         check: isAuth(req),
         itemID: req.params.itemID,
-        itemName: name,
-        itemDesc: desc,
-        itemType: type,
-        itemManu: manufacturer,
-        itemCondition: condition,
-        itemPrice: price,
-        itemCity: city,
-        itemState: state,
-        itemPics: pics
+        itemName: result.name,
+        itemDesc: result.description,
+        itemType: result.type,
+        itemManu: result.manufacturer,
+        itemCondition: result.condition,
+        itemPrice: result.price,
+        itemCity: result.city,
+        itemState: result.state,
+        itemPics: result.picture.split(";")
       });
     },
     function (err) {
@@ -565,35 +474,20 @@ app.get("/account-settings", function (req, res) {
 });
 
 app.get("/account-settings/addresses", function (req, res) {
-
   if (!(isAuth(req))) {
     res.render("login");
   }
 
-  var addressesToRender = [];
+  // Grab all address belonging to a user
+  var query = {
+    userID: userID
+  };
 
-  var promise = new Promise(function (resolve, reject) {
-    Address.find({
-      userID: userID
-    }, function (err, addresses) {
-      if (err) {
-        console.log(err);
-      } else {
-        addressesToRender = addresses;
-        if (addressesToRender.length !== 0) {
-          resolve();
-        } else {
-          reject();
-        }
-      }
-    });
-  });
-
-  promise.then(function (result) {
+  dbFind(Address, query).then(function (result) {
       if (isAuth(req)) {
         res.render("addresses", {
           check: true,
-          addressList: addressesToRender
+          addressList: result
         });
       } else {
         res.render("login");
@@ -604,7 +498,7 @@ app.get("/account-settings/addresses", function (req, res) {
       if (isAuth(req)) {
         res.render("addresses", {
           check: true,
-          addressList: addressesToRender
+          addressList: result
         });
       } else {
         res.render("login");
@@ -613,35 +507,20 @@ app.get("/account-settings/addresses", function (req, res) {
 });
 
 app.get("/account-settings/payment-methods", function (req, res) {
-
   if (!(isAuth(req))) {
     res.render("login");
   }
 
-  var paymentMethodsToRender = [];
+  // Grab all payment methods belonging to a user
+  var query = {
+    userID: userID
+  };
 
-  var promise = new Promise(function (resolve, reject) {
-    Payment.find({
-      userID: userID
-    }, function (err, payments) {
-      if (err) {
-        console.log(err);
-      } else {
-        paymentMethodsToRender = payments;
-        if (paymentMethodsToRender.length !== 0) {
-          resolve();
-        } else {
-          reject();
-        }
-      }
-    });
-  });
-
-  promise.then(function (result) {
+  dbFind(Payment, query).then(function (result) {
       if (isAuth(req)) {
         res.render("payment-methods", {
           check: true,
-          paymentList: paymentMethodsToRender
+          paymentList: result
         });
       } else {
         res.render("login");
@@ -652,7 +531,7 @@ app.get("/account-settings/payment-methods", function (req, res) {
       if (isAuth(req)) {
         res.render("payment-methods", {
           check: true,
-          paymentList: paymentMethodsToRender
+          paymentList: presult
         });
       } else {
         res.render("login");
@@ -661,7 +540,6 @@ app.get("/account-settings/payment-methods", function (req, res) {
 });
 
 app.get("/account-settings/notification-preferences", function (req, res) {
-
   if (!(isAuth(req))) {
     res.render("login");
   }
@@ -672,7 +550,6 @@ app.get("/account-settings/notification-preferences", function (req, res) {
 });
 
 app.get("/account-settings/delete-account", function (req, res) {
-
   if (!(isAuth(req))) {
     res.render("login");
   }
@@ -682,38 +559,21 @@ app.get("/account-settings/delete-account", function (req, res) {
   });
 });
 
-app.get("/login", function (req, res) {
-  res.render("login");
-});
-
 app.get("/user-items", function (req, res) {
-
   if (!(isAuth(req))) {
     res.render("login");
   }
 
-  var itemsToRender = [];
-  var promise = new Promise(function (resolve, reject) {
-    Item.find({
-      userID: userID
-    }, function (err, items) {
-      if (err) {
-        console.log(err);
-      } else {
-        itemsToRender = items;
-        if (itemsToRender.length !== 0) {
-          resolve();
-        } else {
-          reject();
-        }
-      }
-    }).limit(gPageLimit);
-  });
-  promise.then(function (result) {
+  // Grab all items belonging to a user
+  var query = {
+    userID: userID
+  };
+
+  dbFind(Item, query, gPageLimit).then(function (result) {
       if (isAuth(req)) {
         res.render("user-items", {
           check: true,
-          itemList: itemsToRender,
+          itemList: result,
           pageLimit: 4,
           pageNum: 1,
           sortCriteria: ""
@@ -727,7 +587,7 @@ app.get("/user-items", function (req, res) {
       if (isAuth(req)) {
         res.render("user-items", {
           check: true,
-          itemList: itemsToRender,
+          itemList: result,
           pageLimit: 4,
           pageNum: 1,
           sortCriteria: ""
@@ -739,126 +599,80 @@ app.get("/user-items", function (req, res) {
 });
 
 app.get("/edit-address/:addressID", function (req, res) {
-
   if (!(isAuth(req))) {
     res.render("login");
   }
 
+  // Grab address details for edit-address page
   var id = req.params.addressID;
-  var userID;
-  var fullname;
-  var address1;
-  var address2;
-  var city;
-  var state;
-  var zip;
+  var query = {
+    _id: id
+  };
 
-  var promise = new Promise(function (resolve, reject) {
-    Address.findOne({
-        _id: id
-      },
-      function (err, address) {
-        userID = address.userID;
-        fullname = address.fullname;
-        address1 = address.address1;
-        address2 = address.address2;
-        city = address.city;
-        state = address.state;
-        zip = address.zip;
-        if (err) {
-          console.log("Error: /edit-address/:addressID - " + err);
-          reject();
-        } else {
-          resolve();
-        }
-      });
-  });
-
-  promise.then(function (result) {
+  dbFindOne(Address, query).then(function (result) {
       if (isAuth(req)) {
         res.render("edit-address", {
           check: true,
           id: id,
-          userID: userID,
-          fullname: fullname,
-          address1: address1,
-          address2: address2,
-          city: city,
-          state: state,
-          zip: zip
+          userID: result.userID,
+          fullname: result.fullname,
+          address1: result.address1,
+          address2: result.address2,
+          city: result.city,
+          state: result.state,
+          zip: result.zip
         });
       } else {
         res.render("login");
       }
     },
     function (err) {
-      console.log("Error (promise): /edit-address/:addressID - " + err);
+      console.log("Error: /edit-address/:addressID - " + err);
       res.render("error");
     });
 });
 
 app.get("/edit-payment/:paymentID", function (req, res) {
-
   if (!(isAuth(req))) {
     res.render("login");
   }
 
+  // Grab payment method details for edit-payment page
   var id = req.params.paymentID;
-  var userID;
-  var fullname;
-  var cardNumber;
   var expDate;
   var expMonth;
   var expYear;
-  var zip;
 
-  var promise = new Promise(function (resolve, reject) {
-    Payment.findOne({
-        _id: id
-      },
-      function (err, payment) {
-        userID = payment.userID;
-        fullname = payment.fullname;
-        cardNumber = payment.cardNumber;
-        expDate = payment.expirationDate;
-        zip = payment.zip;
+  var query = {
+    _id: id
+  };
 
-        expMonth = expDate.split("/")[0];
-        expYear = expDate.split("/")[1];
-
-        if (err) {
-          console.log("Error: /edit-payment/:paymentID - " + err);
-          reject();
-        } else {
-          resolve();
-        }
-      });
-  });
-
-  promise.then(function (result) {
+  dbFindOne(Payment, query).then(function (result) {
+      expDate = result.expirationDate;
+      expMonth = expDate.split("/")[0];
+      expYear = expDate.split("/")[1];
       if (isAuth(req)) {
         res.render("edit-payment", {
           check: true,
           id: id,
-          userID: userID,
-          fullname: fullname,
-          cardNumber: cardNumber,
-          expMonth: expMonth,
-          expYear: expYear,
-          zip: zip
+          userID: result.userID,
+          fullname: result.fullname,
+          cardNumber: result.cardNumber,
+          expMonth: result.expMonth,
+          expYear: result.expYear,
+          zip: result.zip
         });
       } else {
         res.render("login");
       }
     },
     function (err) {
-      console.log("Error (promise): /edit-payment/:paymentID - " + err);
+      console.log("Error: /edit-payment/:paymentID - " + err);
       res.render("error");
     });
 });
 
 app.get("/cart", function (req, res) {
-
   if (!(isAuth(req))) {
     res.render("login");
   }
@@ -914,11 +728,11 @@ app.post("/login", function (req, res) {
 });
 
 app.post("/user-items", function (req, res) {
-
   if (!(isAuth(req))) {
     res.render("login");
   }
 
+  // Grab all user items with pagination parameters
   var limit = parseInt(req.body.pageLimit);
   var page = parseInt(req.body.pageNumber);
   var next = req.body.next;
@@ -981,29 +795,15 @@ app.post("/user-items", function (req, res) {
 
   var skip = page * limit;
 
-  var itemsToRender = [];
+  var query = {
+    userID: userID
+  };
 
-  var promise = new Promise(function (resolve, reject) {
-    Item.find({
-      userID: userID
-    }, function (err, items) {
-      if (err) {
-        console.log(err);
-      } else {
-        itemsToRender = items;
-        if (itemsToRender.length !== 0) {
-          resolve();
-        } else {
-          reject();
-        }
-      }
-    }).limit(limit).skip(skip).sort(sort);
-  });
-  promise.then(function (result) {
+  dbFind(Item, query, limit, skip, sort).then(function (result) {
       if (isAuth(req)) {
         res.render("user-items", {
           check: true,
-          itemList: itemsToRender,
+          itemList: result,
           pageLimit: limit,
           pageNum: page + 1,
           sortCriteria: sortCriteria
@@ -1017,7 +817,7 @@ app.post("/user-items", function (req, res) {
       if (isAuth(req)) {
         res.render("user-items", {
           check: true,
-          itemList: itemsToRender,
+          itemList: result,
           pageLimit: limit,
           pageNum: page + 1,
           sortCriteria: sortCriteria
@@ -1029,6 +829,7 @@ app.post("/user-items", function (req, res) {
 });
 
 app.post("/search-results/:itemType?", function (req, res) {
+  // Grab all items that fit search criteria with pagination
   var search = req.body.searchText;
   var category = req.body.category;
 
@@ -1102,32 +903,20 @@ app.post("/search-results/:itemType?", function (req, res) {
 
   var skip = page * limit;
 
-  var itemsToRender = [];
-  var promise = new Promise(function (resolve, reject) {
-    // db.getCollection('items').find({"name":{$regex:".*test.*", $options: "i"}, "itemType":{$regex: ".*Clothing.*"}})
-    Item.find({
-      name: {
-        $regex: ".*" + search + ".*",
-        $options: "i"
-      },
-      itemType: {
-        $regex: ".*" + category + ".*"
-      }
-    }, function (err, items) {
-      if (err) {
-        console.log("Error: /search-results - " + err);
-        reject();
-      } else {
-        console.log(items);
-        itemsToRender = items;
-        resolve();
-      }
-    }).limit(limit).skip(skip).sort(sort);
-  });
-  promise.then(function (result) {
+  var query = {
+    name: {
+      $regex: ".*" + search + ".*",
+      $options: "i"
+    },
+    itemType: {
+      $regex: ".*" + category + ".*"
+    }
+  };
+
+  dbFind(Item, query, limit, skip, sort).then(function (result) {
     res.render("search-results", {
       check: isAuth(req),
-      itemList: itemsToRender,
+      itemList: result,
       itemType: category,
       pageNum: page + 1,
       pageLimit: limit,
@@ -1353,11 +1142,11 @@ app.put("/item/wishlist-add/:itemID", function (req, res) {
 // PATCH/UPDATE
 
 app.patch("/edit-item/database-edit", function (req, res) {
-
   if (!(isAuth(req))) {
     res.render("login");
   }
 
+  // Grab current item pictures
   console.log("Begin edit");
   var id = req.body.itemID;
   var name = req.body.nameOfItem;
@@ -1372,28 +1161,19 @@ app.patch("/edit-item/database-edit", function (req, res) {
   var pics;
   var difference;
 
-  // Find current item pictures
-  var promise = new Promise(function (resolve, reject) {
-    Item.findOne({
-      _id: ObjectId(id)
-    }, function (err, item) {
-      pics = item.picture;
-      if (err) {
-        reject(err);
-      } else {
-        resolve(item);
-      }
-    });
-  });
-  promise.then(function (result) {
+  var query = {
+    _id: id
+  };
+
+  dbFindOne(Item, query).then(function (result) {
       console.log("Current pictures found");
       console.log("Getting images to remove from S3 bucket");
       // Get difference of removed pics and current pics
-      difference = pics.split(";").filter(x => !removedImages.includes(x));
+      difference = result.picture.split(";").filter(x => !removedImages.includes(x));
 
       // Update item in DB
       var filter = {
-        _id: ObjectId(id)
+        _id: id
       };
       var update = {
         $set: {
@@ -1617,11 +1397,11 @@ app.patch("/edit-payment/payment-edit", function (req, res) {
 // DELETE
 
 app.delete("/edit-item/delete-item", function (req, res) {
-
   if (!(isAuth(req))) {
     res.render("login");
   }
 
+  // Grab item to show user what item was deleted
   var id = req.body.itemID;
   var name;
   var desc;
@@ -1631,74 +1411,60 @@ app.delete("/edit-item/delete-item", function (req, res) {
   var state;
   var pics;
 
-  var promise = new Promise(function (resolve, reject) {
-    Item.findOne({
-      _id: id
-    }, function (err, item) {
-      name = item.name;
-      desc = item.description;
-      manufacturer = item.manufacturer;
-      price = item.price;
-      city = item.city;
-      state = item.state;
-      pics = item.picture;
-      if (err) {
-        console.log(err);
-      } else {
-        if (item) {
-          resolve();
-        } else {
-          reject();
-        }
-      }
-    });
-  });
+  var query = {
+    _id: id
+  };
 
-  promise.then(function (result) {
+  dbFind(Item, query).then(function (result) {
       console.log("Item found.");
-      console.log(result);
-    },
-    function (err) {
-      console.log(err);
-    });
+      name = result.name;
+      desc = result.description;
+      manufacturer = result.manufacturer;
+      price = result.price;
+      city = result.city;
+      state = result.state;
+      pics = result.picture;
 
-  console.log("Begin delete.");
-  var promise = new Promise(function (resolve, reject) {
-    Item.deleteOne({
-      _id: id
-    }, function (err) {
-      if (err) {
-        console.log(err);
-        reject();
-      } else {
-        resolve();
-      }
-    });
-  });
-
-  promise.then(function (result) {
-      pics = pics.split(";");
-      console.log(result);
-      res.render("delete-success", {
-        check: isAuth(req),
-        itemID: id,
-        itemName: name,
-        itemDesc: desc,
-        itemManu: manufacturer,
-        itemPrice: price,
-        itemCity: city,
-        itemState: state,
-        itemPics: pics
+      console.log("Begin delete.");
+      var promise = new Promise(function (resolve, reject) {
+        Item.deleteOne({
+          _id: id
+        }, function (err) {
+          if (err) {
+            console.log(err);
+            reject();
+          } else {
+            resolve();
+          }
+        });
       });
+
+      promise.then(function (result) {
+          pics = pics.split(";");
+          console.log(result);
+          res.render("delete-success", {
+            check: isAuth(req),
+            itemID: id,
+            itemName: name,
+            itemDesc: desc,
+            itemManu: manufacturer,
+            itemPrice: price,
+            itemCity: city,
+            itemState: state,
+            itemPics: pics
+          });
+        },
+        function (err) {
+          console.log(err);
+          res.render("delete-error");
+        });
     },
     function (err) {
       console.log(err);
-      res.render("delete-error");
     });
 });
 
 app.delete("/account-settings/delete-address", function (req, res) {
-
   if (!(isAuth(req))) {
     res.render("login");
   }
@@ -1797,11 +1563,10 @@ app.delete("/account-settings/delete-account", function (req, res) {
 function isAuth(req) {
   var check;
   if (req.isAuthenticated()) {
-    check = true;
+    return true;
   } else {
-    check = false;
+    return false;
   }
-  return check;
 }
 
 function uuidv4() {
@@ -1812,16 +1577,28 @@ function uuidv4() {
   });
 }
 
-function dbFindOne(collection, query) {
+function dbFind(collection, query = {}, limit = 0, skip = 0, sort = {}) {
   return new Promise((resolve, reject) => {
-    collection.findOne(query, (err, res) => {
+    collection.find(query, (err, result) => {
       if (err) {
         reject(err);
-        return;
+      } else {
+        resolve(result);
       }
-      resolve(res);
-    })
-  })
+    }).limit(limit).skip(skip).sort(sort);
+  });
+}
+
+function dbFindOne(collection, query = {}) {
+  return new Promise((resolve, reject) => {
+    collection.findOne(query, (err, result) => {
+      if (err) {
+        reject(err);
+      } else {
+        resolve(result);
+      }
+    });
+  });
 }
 
 app.listen(3000, function () {
